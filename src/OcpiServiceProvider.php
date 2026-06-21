@@ -27,6 +27,12 @@ class OcpiServiceProvider extends ServiceProvider
             __DIR__.'/../config/ocpi-emsp.php',
             'ocpi-emsp'
         );
+
+        # CPO
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/ocpi-cpo.php',
+            'ocpi-cpo'
+        );
     }
 
     /**
