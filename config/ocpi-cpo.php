@@ -25,28 +25,26 @@ return [
 
     'versions' => [
         '2.1.1' => [
-            'base_url' => env('OCPI_CPO_V2_1_1_BASE_URL', env('APP_URL').'/ocpi/2.1.1'),
+            'base_url' => env('OCPI_CPO_V2_1_1_BASE_URL', env('APP_URL') . '/ocpi/2.1.1'),
             'modules' => [
-                'credentials',
-                'locations',
-                'sessions',
-                'cdrs',
-                'tokens',
-                'commands',
-                'tariffs',
+                'credentials' => ['role' => 'BOTH'],
+                'locations'   => ['role' => 'SENDER'],
+                'sessions'    => ['role' => 'SENDER'],
+                'cdrs'        => ['role' => 'SENDER'],
+                'tokens'      => ['role' => 'RECEIVER'],
+                'commands'    => ['role' => 'RECEIVER'],
             ],
         ],
 
         '2.2.1' => [
-            'base_url' => env('OCPI_CPO_V2_2_1_BASE_URL', env('APP_URL').'/ocpi/2.2.1'),
+            'base_url' => env('OCPI_CPO_V2_2_1_BASE_URL', env('APP_URL') . '/ocpi/2.2.1'),
             'modules' => [
-                'credentials',
-                'locations',
-                'sessions',
-                'cdrs',
-                'tokens',
-                'commands',
-                'tariffs',
+                'credentials' => ['role' => 'RECEIVER'],
+                'locations'   => ['role' => 'SENDER'],
+                'sessions'    => ['role' => 'SENDER'],
+                'cdrs'        => ['role' => 'SENDER'],
+                'tokens'      => ['role' => 'RECEIVER'],
+                'commands'    => ['role' => 'RECEIVER'],
             ],
         ],
     ],

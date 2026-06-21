@@ -19,18 +19,18 @@ class OcpiServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/ocpi.php',
+            __DIR__ . '/../config/ocpi.php',
             'ocpi'
         );
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/ocpi-emsp.php',
+            __DIR__ . '/../config/ocpi-emsp.php',
             'ocpi-emsp'
         );
 
         # CPO
         $this->mergeConfigFrom(
-            __DIR__.'/../config/ocpi-cpo.php',
+            __DIR__ . '/../config/ocpi-cpo.php',
             'ocpi-cpo'
         );
     }
@@ -52,16 +52,22 @@ class OcpiServiceProvider extends ServiceProvider
 
     private function loadMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/Data/Migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/Data/Migrations');
     }
 
     private function loadRoutes(): void
     {
         if (config('ocpi.server.enabled', false) === true) {
+
+            $cpoVersionList = config('ocpi-cpo.versions', []);
+            if (count($cpoVersionList) > 0) {
+                $this->loadRoutesFrom(__DIR__ . '/Modules/CPO/Versions/Server/Endpoints/2.1.1.php');
+            }
+
             $emspVersionList = config('ocpi-emsp.versions', []);
             if (count($emspVersionList) > 0) {
-                $this->loadRoutesFrom(__DIR__.'/Support/Server/Endpoints/common.php');
-                $this->loadRoutesFrom(__DIR__.'/Support/Server/Endpoints/version.php');
+                $this->loadRoutesFrom(__DIR__ . '/Support/Server/Endpoints/common.php');
+                $this->loadRoutesFrom(__DIR__ . '/Support/Server/Endpoints/version.php');
             }
         }
     }
@@ -69,11 +75,11 @@ class OcpiServiceProvider extends ServiceProvider
     private function publishConfig(): void
     {
         $this->publishes([
-            __DIR__.'/../config/ocpi.php' => config_path('ocpi.php'),
+            __DIR__ . '/../config/ocpi.php' => config_path('ocpi.php'),
         ], 'ocpi-config');
 
         $this->publishes([
-            __DIR__.'/../config/ocpi-emsp.php' => config_path('ocpi-emsp.php'),
+            __DIR__ . '/../config/ocpi-emsp.php' => config_path('ocpi-emsp.php'),
         ], 'ocpi-emsp-config');
     }
 
