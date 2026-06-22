@@ -30,10 +30,8 @@ class VersionDetailsController
         }
 
         return $this->ocpiSuccessResponse([
-            [
                 'version' => $version,
                 'endpoints' => $endpoints,
-            ],
         ]);
     }
 }
