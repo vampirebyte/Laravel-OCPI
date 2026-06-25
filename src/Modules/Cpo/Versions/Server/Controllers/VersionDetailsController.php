@@ -1,6 +1,6 @@
 <?php
 
-namespace Ocpi\Modules\CPO\Versions\Server\Controllers;
+namespace Ocpi\Modules\Cpo\Versions\Server\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Ocpi\Support\Traits\Server\Response;

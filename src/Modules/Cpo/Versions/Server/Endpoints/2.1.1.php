@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Ocpi\Modules\CPO\Versions\Server\Controllers\VersionsController;
-use Ocpi\Modules\CPO\Versions\Server\Controllers\VersionDetailsController;
+use Ocpi\Modules\Cpo\Versions\Server\Controllers\VersionsController;
+use Ocpi\Modules\Cpo\Versions\Server\Controllers\VersionDetailsController;
 use Ocpi\Support\Server\Middlewares\IdentifyParty;
 use Ocpi\Support\Server\Middlewares\LogRequest;
 

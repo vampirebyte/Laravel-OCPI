@@ -18,7 +18,7 @@ use Ocpi\Support\Server\Controllers\Controller;
 use Ocpi\Modules\Cpo\Credentials\Actions\Party\SelfCredentialsGetAction;
 use Ocpi\Modules\Cpo\Credentials\Events;
 use Ocpi\Modules\Cpo\Credentials\Validators\V2_1_1\CredentialsValidator;
-use Ocpi\Modules\CPO\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
+use Ocpi\Modules\Cpo\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
 
 class PostController extends Controller
 {

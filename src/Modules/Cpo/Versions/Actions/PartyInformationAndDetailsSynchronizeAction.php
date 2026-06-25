@@ -1,6 +1,6 @@
 <?php
 
-namespace Ocpi\Modules\CPO\Versions\Actions;
+namespace Ocpi\Modules\Cpo\Versions\Actions;
 
 use Exception;
 use Illuminate\Support\Arr;
