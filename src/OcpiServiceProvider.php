@@ -11,6 +11,8 @@ use Ocpi\Modules\Credentials\Console\Commands\Update as ModuleCredentialsUpdate;
 use Ocpi\Modules\Locations\Console\Commands\Synchronize as ModuleLocationsSynchronize;
 use Ocpi\Modules\Versions\Console\Commands\Update as ModuleVersionsUpdate;
 
+use Ocpi\Modules\Cpo\Credentials\Console\Commands\Initialize as CpoModuleCredentialsInitialize;
+
 class OcpiServiceProvider extends ServiceProvider
 {
     /**
@@ -62,6 +64,7 @@ class OcpiServiceProvider extends ServiceProvider
             $cpoVersionList = config('ocpi-cpo.versions', []);
             if (count($cpoVersionList) > 0) {
                 $this->loadRoutesFrom(__DIR__ . '/Modules/CPO/Versions/Server/Endpoints/2.1.1.php');
+                $this->loadRoutesFrom(__DIR__ . '/Modules/CPO/Credentials/Server/Endpoints/2.1.1.php');
             }
 
             $emspVersionList = config('ocpi-emsp.versions', []);
@@ -91,6 +94,7 @@ class OcpiServiceProvider extends ServiceProvider
             ModuleCredentialsRegister::class,
             ModuleCredentialsUpdate::class,
             ModuleLocationsSynchronize::class,
+            CpoModuleCredentialsInitialize::class,
         ]);
     }
 
