@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Ocpi\Modules\Cpo\Versions\Server\Controllers\VersionsController;
 use Ocpi\Modules\Cpo\Versions\Server\Controllers\VersionDetailsController;
-use Ocpi\Support\Server\Middlewares\IdentifyParty;
+use Ocpi\Support\Server\Middlewares\Cpo\IdentifyParty;
 use Ocpi\Support\Server\Middlewares\LogRequest;
 
 

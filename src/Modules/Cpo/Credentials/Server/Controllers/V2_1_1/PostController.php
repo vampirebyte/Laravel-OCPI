@@ -29,7 +29,7 @@ class PostController extends Controller
     ): JsonResponse {
         try {
             $input = CredentialsValidator::validate($request->all());
-            $partyCode = Context::get('party_code');
+            $partyCode = Context::get('cpo_party_code');
 
             $party = Party::with(['roles'])->where('code', $partyCode)->first();
             if ($party === null) {

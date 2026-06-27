@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Ocpi;
 
 use Illuminate\Support\ServiceProvider;
+use Ocpi\Models\Cpo\Contracts\LocationRepository;
+use Ocpi\Models\Cpo\Repositories\NullLocationRepository;
 use Ocpi\Modules\Credentials\Console\Commands\Initialize as ModuleCredentialsInitialize;
 use Ocpi\Modules\Credentials\Console\Commands\Register as ModuleCredentialsRegister;
 use Ocpi\Modules\Credentials\Console\Commands\Update as ModuleCredentialsUpdate;
@@ -20,6 +22,8 @@ class OcpiServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bindIf(LocationRepository::class, NullLocationRepository::class);
+
         $this->mergeConfigFrom(
             __DIR__ . '/../config/ocpi.php',
             'ocpi'
@@ -65,6 +69,7 @@ class OcpiServiceProvider extends ServiceProvider
             if (count($cpoVersionList) > 0) {
                 $this->loadRoutesFrom(__DIR__ . '/Modules/Cpo/Versions/Server/Endpoints/2.1.1.php');
                 $this->loadRoutesFrom(__DIR__ . '/Modules/Cpo/Credentials/Server/Endpoints/2.1.1.php');
+                $this->loadRoutesFrom(__DIR__ . '/Modules/Cpo/Locations/Server/Endpoints/2.1.1.php');
             }
 
             $emspVersionList = config('ocpi-emsp.versions', []);

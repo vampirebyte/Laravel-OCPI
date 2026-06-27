@@ -39,7 +39,7 @@ class Initialize extends Command
         }
 
         $input['url'] = $this->ask('EMS URL of API versions endpoint');
-        $input['client_token'] = $this->ask('Token Used by EMSP to identify thi CPO');
+        $input['client_token'] = $this->ask('Token Used by EMSP to identify this CPO');
 
         try {
             $party = Party::create($input);

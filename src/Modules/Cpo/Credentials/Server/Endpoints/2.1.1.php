@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Ocpi\Modules\Cpo\Credentials\Server\Controllers\DeleteController;
 use Ocpi\Modules\Cpo\Credentials\Server\Controllers\GetController;
 use Ocpi\Modules\Cpo\Credentials\Server\Controllers\V2_1_1\PostController;
-use Ocpi\Support\Server\Middlewares\IdentifyParty;
+use Ocpi\Support\Server\Middlewares\Cpo\IdentifyParty;
 use Ocpi\Support\Server\Middlewares\LogRequest;
 
 Route::middleware(['api', LogRequest::class, IdentifyParty::class])
