@@ -20,7 +20,7 @@ class Initialize extends Command
      *
      * @var string
      */
-    protected $description = 'Initialize a new "Sender" Party to start credentials exchange';
+    protected $description = 'Initialize a new "Receiver" Party to start credentials exchange';
 
     /**
      * Execute the console command.
@@ -29,29 +29,29 @@ class Initialize extends Command
     {
         $input = [];
 
-        $input['name'] = $this->ask('Party name');
-        $input['code'] = $this->ask('Party ID or code');
+        $input['name'] = $this->ask('EMSP Party name');
+        $input['code'] = $this->ask('EMSP Party ID or code');
 
         if (Party::where('code', $input['code'])->exists()) {
-            $this->error('Party already exists.');
+            $this->error('EMS Party already exists.');
 
             return Command::FAILURE;
         }
 
-        $input['url'] = $this->ask('URL of API versions endpoint');
-        $input['client_token'] = $this->ask('Offline generated Credential Token');
+        $input['url'] = $this->ask('EMS URL of API versions endpoint');
+        $input['client_token'] = $this->ask('Token Used by EMSP to identify thi CPO');
 
         try {
             $party = Party::create($input);
         } catch (Exception $e) {
-            $this->error('Error creating Party.');
+            $this->error('Error creating EMSP Party.');
             $this->newLine(2);
             $this->error($e);
 
             return Command::FAILURE;
         }
 
-        $this->info('Party "'.$party->code.'" created successfully.');
+        $this->info('EMSP Party "'.$party->code.'" created successfully.');
 
         return Command::SUCCESS;
     }

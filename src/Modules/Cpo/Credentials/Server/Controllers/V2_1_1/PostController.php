@@ -35,7 +35,7 @@ class PostController extends Controller
             if ($party === null) {
                 return $this->ocpiServerErrorResponse(
                     statusCode: OcpiServerErrorCode::PartyApiUnusable,
-                    statusMessage: 'Client not found.',
+                    statusMessage: 'EMSP Client not found.',
                     httpCode: 405,
                 );
             }
@@ -43,7 +43,7 @@ class PostController extends Controller
             if ($party->registered === true) {
                 return $this->ocpiServerErrorResponse(
                     statusCode: OcpiServerErrorCode::PartyApiUnusable,
-                    statusMessage: 'Client already registered.',
+                    statusMessage: 'EMSP Client already registered.',
                     httpCode: 405,
                 );
             }
