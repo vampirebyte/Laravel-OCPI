@@ -21,10 +21,12 @@ Route::middleware([
                     ->name(Str::replace('.', '_', $version).'.')
                     ->group(function () use ($version, $versionConfiguration) {
                         Route::middleware([])
-                            ->group(__DIR__.'/../../../Modules/Versions/Server/Endpoints/'.$version.'.php');
+                            ->group(__DIR__.'/../../../Modules/Emsp/Versions/Server/Endpoints/'.$version.'.php');
                         foreach ($versionConfiguration['modules'] as $module) {
+                            $emspPath = __DIR__.'/../../../Modules/Emsp/'.Str::ucfirst($module).'/Server/Endpoints/'.$version.'.php';
+                            $defaultPath = __DIR__.'/../../../Modules/'.Str::ucfirst($module).'/Server/Endpoints/'.$version.'.php';
                             Route::middleware([])
-                                ->group(__DIR__.'/../../../Modules/'.Str::ucfirst($module).'/Server/Endpoints/'.$version.'.php');
+                                ->group(file_exists($emspPath) ? $emspPath : $defaultPath);
                         }
                     });
             }

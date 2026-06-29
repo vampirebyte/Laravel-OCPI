@@ -18,7 +18,7 @@ use Ocpi\Support\Server\Controllers\Controller;
 use Ocpi\Modules\Cpo\Credentials\Actions\Party\SelfCredentialsGetAction;
 use Ocpi\Modules\Cpo\Credentials\Events;
 use Ocpi\Modules\Cpo\Credentials\Validators\V2_1_1\CredentialsValidator;
-use Ocpi\Modules\Cpo\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
+use Ocpi\Modules\Shared\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
 
 class PostController extends Controller
 {
@@ -56,7 +56,7 @@ class PostController extends Controller
                     $party->registered = true;
 
                     // OCPI GET calls for Versions Information and Details of the Party, store OCPI endpoints.
-                    $party = $versionsPartyInformationAndDetailsSynchronizeAction->handle($party);
+                    $party = $versionsPartyInformationAndDetailsSynchronizeAction->handle($party, 'ocpi-cpo');
 
                     // Update PartyRole list.
                     $partyRole = $party->roles

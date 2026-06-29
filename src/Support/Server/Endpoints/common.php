@@ -12,5 +12,5 @@ Route::middleware([
     ->prefix(config('ocpi.server.routing.uri_prefix'))
     ->name(config('ocpi.server.routing.name_prefix'))
     ->group(
-        __DIR__.'/../../../Modules/Versions/Server/Endpoints/common.php'
+        __DIR__.'/../../../Modules/Emsp/Versions/Server/Endpoints/common.php'
     );

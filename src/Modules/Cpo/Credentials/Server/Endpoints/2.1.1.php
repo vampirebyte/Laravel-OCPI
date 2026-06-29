@@ -12,6 +12,6 @@ Route::middleware(['api', LogRequest::class, IdentifyParty::class])
     ->name('credentials')
     ->group(function () {
         Route::get('/{version}/credentials', GetController::class);
-        Route::post('/{version}/credentials', PostController::class)->name('.post');
-        Route::delete('/{version}/credentials', DeleteController::class)->name('.delete');
+        Route::post('/{version}/credentials', PostController::class)->name('.cpo-post');
+        Route::delete('/{version}/credentials', DeleteController::class)->name('.cpo-delete');
     });
