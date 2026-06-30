@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Ocpi\Models\PartyRole;
 use Ocpi\Support\Models\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Location extends Model
 {
-    use HasVersion7Uuids,
+    use HasUuids,
         SoftDeletes;
-
     protected $primaryKey = 'emsp_id';
 
     protected $fillable = [
