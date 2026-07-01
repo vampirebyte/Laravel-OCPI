@@ -3,7 +3,7 @@
 namespace Ocpi\Models\Commands;
 
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Ocpi\Models\Commands\Enums\CommandResponseType;
 use Ocpi\Models\Commands\Enums\CommandResultType;
@@ -13,7 +13,7 @@ use Ocpi\Support\Models\Model;
 
 class Command extends Model
 {
-    use HasUlids;
+    use HasUuids;
 
     protected $fillable = [
         'party_role_id',
