@@ -69,6 +69,7 @@ class OcpiServiceProvider extends ServiceProvider
                 $this->loadRoutesFrom(__DIR__ . '/Modules/Cpo/Versions/Server/Endpoints/2.1.1.php');
                 $this->loadRoutesFrom(__DIR__ . '/Modules/Cpo/Credentials/Server/Endpoints/2.1.1.php');
                 $this->loadRoutesFrom(__DIR__ . '/Modules/Cpo/Locations/Server/Endpoints/2.1.1.php');
+                $this->loadRoutesFrom(__DIR__ . '/Modules/Cpo/Commands/Server/Endpoints/2.1.1.php');
             }
 
             $emspVersionList = config('ocpi-emsp.versions', []);

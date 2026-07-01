@@ -5,13 +5,13 @@ namespace Ocpi\Modules\Emsp\Commands\Client;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Log;
 use Ocpi\Models\Commands\Command;
 use Ocpi\Models\Commands\Enums\CommandResponseType;
 use Ocpi\Models\Commands\Enums\CommandType;
 use Ocpi\Models\PartyRole;
 use Ocpi\Modules\Emsp\Commands\Events;
 use Ocpi\Support\Client\Resource as OcpiResource;
+use Log;
 
 class Resource extends OcpiResource
 {
@@ -37,7 +37,7 @@ class Resource extends OcpiResource
             endpoint: $command->type->name,
         );
 
-        $commandResponseType = CommandResponseType::fromName($response);
+        $commandResponseType = CommandResponseType::fromName($response['result'] ?? $response);
         if (! $commandResponseType) {
             Log::channel('ocpi')->error('Unknown CommandResponseType '.json_encode($response));
             throw new Exception('Unknown CommandResponseType '.json_encode($response));
@@ -75,7 +75,7 @@ class Resource extends OcpiResource
             endpoint: $command->type->name,
         );
 
-        $commandResponseType = CommandResponseType::fromName($response);
+        $commandResponseType = CommandResponseType::fromName($response['result'] ?? $response);
         if (! $commandResponseType) {
             Log::channel('ocpi')->error('Unknown CommandResponseType '.json_encode($response));
             throw new Exception('Unknown CommandResponseType '.json_encode($response));

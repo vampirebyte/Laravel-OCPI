@@ -4,7 +4,6 @@ namespace Ocpi\Modules\Cpo\Commands\Server\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Ocpi\Models\Commands\Dto\CommandRequest;
 use Ocpi\Models\Commands\Enums\CommandType;
 use Ocpi\Models\Cpo\Contracts\CommandsContract;
 use Ocpi\Models\Cpo\Dto\CommandRequest as DtoCommandRequest;
@@ -17,7 +16,8 @@ class CommandsController extends Controller
     /**
      * POST /commands/{commandType}
      */
-    public function handle(CommandType $commandType, Request $request,): JsonResponse {
+    public function handle(string $commandType, Request $request,): JsonResponse {
+        $commandType = CommandType::from($commandType);
 
         $data = $request->validate([
             'response_url' => ['required', 'url'],

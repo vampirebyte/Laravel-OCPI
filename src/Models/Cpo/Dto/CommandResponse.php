@@ -10,7 +10,7 @@ namespace Ocpi\Models\Cpo\Dto;
 class CommandResponse
 {
     public function __construct(
-        public string $result,        // ACCEPTED | REJECTED | UNKNOWN_SESSION | NOT_SUPPORTED
+        public string $result,
         public ?string $timeout = null
     ) {}
 }
