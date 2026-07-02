@@ -18,10 +18,10 @@ class CommandRequest
          */
         public readonly string $responseUrl,
 
+        public readonly mixed $token = null,
         public readonly ?string $locationId = null,
         public readonly ?string $evseUid = null,
         public readonly ?string $connectorId = null,
-        public readonly mixed $token = null,
         public readonly ?string $sessionId = null,
         public readonly ?string $reservationId = null,
         public readonly ?string $expiryDate = null,
