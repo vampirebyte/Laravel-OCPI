@@ -3,13 +3,12 @@
 namespace Ocpi\Models\Cpo\Dto;
 
 use Ocpi\Models\Commands\Enums\CommandType;
+use Ocpi\Models\Party;
 
-/**
- * Immediate OCPI response returned to the EMS.
- */
 class CommandRequest
 {
     public function __construct(
+        public readonly Party $party,
         public readonly CommandType $type,
 
         /**
