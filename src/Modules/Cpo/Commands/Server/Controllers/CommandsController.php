@@ -30,7 +30,8 @@ class CommandsController extends Controller
         $partyCode = Context::get('cpo_party_code');
         $party = Party::where('code', $partyCode)->first();
 
-        if ($party) {
+        if (!$party) 
+        {
             return $this->ocpiClientErrorResponse(
                 statusCode: OcpiClientErrorCode::InvalidParameters,
                 statusMessage: 'Invalid Authorization Token or Party.',
@@ -45,7 +46,7 @@ class CommandsController extends Controller
             'token' => ['sometimes'],
             'session_id' => ['sometimes', 'string'],
             'reservation_id' => ['sometimes', 'string'],
-            'expiry_date' => ['sometimes', 'date'],
+            'expiry_date' => ['required', 'date', 'after:now'],
         ]);
 
         $command = new DtoCommandRequest(
