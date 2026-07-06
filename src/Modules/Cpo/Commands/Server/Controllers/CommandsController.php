@@ -9,6 +9,7 @@ use Ocpi\Models\Cpo\Contracts\CommandsContract;
 use Ocpi\Models\Cpo\Dto\CommandRequest as DtoCommandRequest;
 use Ocpi\Support\Server\Controllers\Controller;
 use Illuminate\Support\Facades\Context;
+use Illuminate\Validation\Rule;
 use Ocpi\Models\Party;
 use Ocpi\Support\Enums\OcpiClientErrorCode;
 use Ocpi\Support\Traits\Server\Response as ServerResponse;
@@ -30,28 +31,59 @@ class CommandsController extends Controller
         $partyCode = Context::get('cpo_party_code');
         $party = Party::where('code', $partyCode)->first();
 
-        if (!$party) 
-        {
+        if (!$party) {
             return $this->ocpiClientErrorResponse(
                 statusCode: OcpiClientErrorCode::InvalidParameters,
                 statusMessage: 'Invalid Authorization Token or Party.',
             );
         }
-
+        $type = CommandType::from($commandType);
         $data = $request->validate([
             'response_url' => ['required', 'url'],
-            'location_id' => ['sometimes', 'string'],
-            'evse_uid' => ['sometimes', 'string'],
-            'connector_id' => ['sometimes', 'string'],
-            'token' => ['sometimes'],
-            'session_id' => ['sometimes', 'string'],
-            'reservation_id' => ['sometimes', 'string'],
-            'expiry_date' => ['required', 'date', 'after:now'],
+            'location_id' => [
+                Rule::requiredIf(in_array($type, [
+                    CommandType::START_SESSION,
+                    CommandType::RESERVE_NOW,
+                    CommandType::UNLOCK_CONNECTOR,
+                ])),
+                'string',
+            ],
+            'evse_uid' => [
+                Rule::requiredIf($type === CommandType::UNLOCK_CONNECTOR),
+                'string',
+            ],
+            'connector_id' => [
+                Rule::requiredIf($type === CommandType::UNLOCK_CONNECTOR),
+                'string',
+            ],
+            'token' => [
+                Rule::requiredIf(in_array($type, [
+                    CommandType::START_SESSION,
+                    CommandType::RESERVE_NOW,
+                ])),
+                'array',
+            ],
+            'session_id' => [
+                Rule::requiredIf($type === CommandType::STOP_SESSION),
+                'string',
+            ],
+            'reservation_id' => [
+                Rule::requiredIf(in_array($type, [
+                    CommandType::RESERVE_NOW,
+                    CommandType::CANCEL_RESERVATION,
+                ])),
+                'integer',
+            ],
+            'expiry_date' => [
+                Rule::requiredIf($type === CommandType::RESERVE_NOW),
+                'date',
+                'after:now',
+            ],
         ]);
 
         $command = new DtoCommandRequest(
             party: $party,
-            type: CommandType::from($commandType),
+            type: $type,
             responseUrl: $data['response_url'],
             locationId: $data['location_id'] ?? null,
             evseUid: $data['evse_uid'] ?? null,
