@@ -3,7 +3,7 @@
 namespace Ocpi\Models\Cdrs;
 
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
-use Illuminate\Database\Eloquent\Concerns\HasVersion7Uuids;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Ocpi\Models\Locations\LocationEvse;
@@ -12,7 +12,7 @@ use Ocpi\Support\Models\Model;
 
 class Cdr extends Model
 {
-    use HasVersion7Uuids,
+    use HasUuids,
         SoftDeletes;
 
     protected $primaryKey = 'emsp_id';
