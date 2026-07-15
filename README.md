@@ -177,12 +177,6 @@ php artisan ocpi:credentials:update {party_code} {--without_new_client_token}
 php artisan ocpi:locations:synchronize {--P|party=}
 ```
 
-
-## License
-
-The DBAD License (DBAD). Please see [License File](LICENSE.md) for more information.
-
-
 # OCPI CPO Integration
 
 This package allows you to integrate your own charging platform with the OCPI CPO modules by providing implementations for the required contracts.
@@ -426,3 +420,7 @@ php artisan ocpi:credentials:cpo_initialize
 ```
 
 Once configured, the package will automatically use your implementations for the OCPI Locations, Commands, and Credentials modules.
+
+## License
+
+The DBAD License (DBAD). Please see [License File](LICENSE.md) for more information.
