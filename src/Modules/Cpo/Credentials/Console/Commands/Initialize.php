@@ -39,7 +39,14 @@ class Initialize extends Command
         }
 
         $input['url'] = $this->ask('EMS URL of API versions endpoint');
-        $input['client_token'] = $this->ask('Token Used by EMSP to identify this CPO');
+
+        $isCpoInitiated = $this->choice('Who starts the credentials exchange?', ['CPO', 'EMSP'], 'CPO') === 'CPO';
+
+        if ($isCpoInitiated) {
+            $input['server_token'] = $this->ask('Registration token (Token A) provided by the EMSP');
+        } else {
+            $input['client_token'] = $this->ask('Token Used by EMSP to identify this CPO');
+        }
 
         try {
             $party = Party::create($input);
@@ -52,6 +59,10 @@ class Initialize extends Command
         }
 
         $this->info('EMSP Party "'.$party->code.'" created successfully.');
+
+        if ($isCpoInitiated) {
+            $this->info('Credentials exchange can be launched executing: php artisan ocpi:credentials:cpo_register '.$party->code);
+        }
 
         return Command::SUCCESS;
     }

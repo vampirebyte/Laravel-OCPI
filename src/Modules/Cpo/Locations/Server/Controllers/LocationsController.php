@@ -4,9 +4,10 @@ namespace Ocpi\Modules\Cpo\Locations\Server\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Context;
 use Ocpi\Models\Cpo\Contracts\LocationRepository;
-use Ocpi\Support\Server\Controllers\Controller;
 use Ocpi\Support\Enums\OcpiClientErrorCode;
+use Ocpi\Support\Server\Controllers\Controller;
 
 class LocationsController extends Controller
 {
@@ -17,14 +18,16 @@ class LocationsController extends Controller
     public function index(Request $request): JsonResponse
     {
         $filters = $request->only(['date_from', 'date_to']);
-        $offset  = (int) $request->query('offset', 0);
-        $limit   = (int) $request->query('limit', 100);
+        $offset = (int) $request->query('offset', 0);
+        $limit = (int) $request->query('limit', 100);
 
         $filters['offset'] = $offset;
-        $filters['limit']  = $limit;
+        $filters['limit'] = $limit;
 
-        $locations = $this->repository->getLocations($filters);
-        $total     = $this->repository->countLocations($filters);
+        $locations = $this->repository->getLocations($filters)
+            ->map(fn ($location) => $location->toArray($this->version()))
+            ->values();
+        $total = $this->repository->countLocations($filters);
 
         return $this->ocpiSuccessResponse($locations)
             ->header('X-Total-Count', $total)
@@ -36,41 +39,49 @@ class LocationsController extends Controller
     {
         $location = $this->repository->getLocation($locationId);
 
-        if (!$location) {
+        if (! $location) {
             return $this->ocpiClientErrorResponse(
                 statusCode: OcpiClientErrorCode::NotEnoughInformation,
                 statusMessage: 'Location not found',
             );
         }
 
-        return $this->ocpiSuccessResponse($location);
+        return $this->ocpiSuccessResponse($location->toArray($this->version()));
     }
 
     public function showEvse(string $locationId, string $evseUid): JsonResponse
     {
         $evse = $this->repository->getEvse($locationId, $evseUid);
 
-        if (!$evse) {
+        if (! $evse) {
             return $this->ocpiClientErrorResponse(
                 statusCode: OcpiClientErrorCode::NotEnoughInformation,
                 statusMessage: 'EVSE not found',
             );
         }
 
-        return $this->ocpiSuccessResponse($evse);
+        return $this->ocpiSuccessResponse($evse->toArray($this->version()));
     }
 
     public function showConnector(string $locationId, string $evseUid, string $connectorId): JsonResponse
     {
         $connector = $this->repository->getConnector($locationId, $evseUid, $connectorId);
 
-        if (!$connector) {
+        if (! $connector) {
             return $this->ocpiClientErrorResponse(
                 statusCode: OcpiClientErrorCode::NotEnoughInformation,
                 statusMessage: 'Connector',
             );
         }
 
-        return $this->ocpiSuccessResponse($connector);
+        return $this->ocpiSuccessResponse($connector->toArray($this->version()));
+    }
+
+    /**
+     * The OCPI version of the request, 2.1.1 until every version has its own routes.
+     */
+    private function version(): string
+    {
+        return Context::get('ocpi_version', '2.1.1');
     }
 }

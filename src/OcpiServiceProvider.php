@@ -6,13 +6,14 @@ namespace Ocpi;
 
 use Illuminate\Support\ServiceProvider;
 use Ocpi\Models\Cpo\Contracts\LocationRepository;
-use Ocpi\Models\Cpo\Repositories\NullLocationRepository;
+use Ocpi\Models\Cpo\Repository\NullLocationRepository;
 use Ocpi\Modules\Emsp\Credentials\Console\Commands\Initialize as ModuleCredentialsInitialize;
 use Ocpi\Modules\Emsp\Credentials\Console\Commands\Register as ModuleCredentialsRegister;
 use Ocpi\Modules\Emsp\Credentials\Console\Commands\Update as ModuleCredentialsUpdate;
 use Ocpi\Modules\Emsp\Locations\Console\Commands\Synchronize as ModuleLocationsSynchronize;
 use Ocpi\Modules\Emsp\Versions\Console\Commands\Update as ModuleVersionsUpdate;
 use Ocpi\Modules\Cpo\Credentials\Console\Commands\Initialize as CpoModuleCredentialsInitialize;
+use Ocpi\Modules\Cpo\Credentials\Console\Commands\Register as CpoModuleCredentialsRegister;
 
 class OcpiServiceProvider extends ServiceProvider
 {
@@ -100,6 +101,7 @@ class OcpiServiceProvider extends ServiceProvider
             ModuleCredentialsUpdate::class,
             ModuleLocationsSynchronize::class,
             CpoModuleCredentialsInitialize::class,
+            CpoModuleCredentialsRegister::class,
         ]);
     }
 

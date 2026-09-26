@@ -1,6 +1,6 @@
 <?php
 
-namespace Ocpi\Models\Cpo\Repositories;
+namespace Ocpi\Models\Cpo\Repository;
 
 
 
