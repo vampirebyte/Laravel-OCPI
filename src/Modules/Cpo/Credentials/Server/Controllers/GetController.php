@@ -14,7 +14,7 @@ class GetController extends Controller
 {
     public function __invoke(Request $request, SelfCredentialsGetAction $selfCredentialsGetAction): JsonResponse
     {
-        $party = Party::where('code', Context::get('party_code'))->first();
+        $party = Party::where('code', Context::get('cpo_party_code'))->first();
         if ($party === null) {
             return $this->ocpiServerErrorResponse(
                 statusCode: OcpiServerErrorCode::PartyApiUnusable

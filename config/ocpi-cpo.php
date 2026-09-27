@@ -29,6 +29,7 @@ return [
             'modules' => [
                 'credentials' => ['role' => 'BOTH'],
                 'locations'   => ['role' => 'SENDER'],
+                'tariffs'     => ['role' => 'SENDER'],
                 'sessions'    => ['role' => 'SENDER'],
                 'cdrs'        => ['role' => 'SENDER'],
                 'tokens'      => ['role' => 'RECEIVER'],
@@ -41,6 +42,7 @@ return [
             'modules' => [
                 'credentials' => ['role' => 'RECEIVER'],
                 'locations'   => ['role' => 'SENDER'],
+                'tariffs'     => ['role' => 'SENDER'],
                 'sessions'    => ['role' => 'SENDER'],
                 'cdrs'        => ['role' => 'SENDER'],
                 'tokens'      => ['role' => 'RECEIVER'],

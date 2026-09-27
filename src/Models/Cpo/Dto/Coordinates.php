@@ -8,4 +8,12 @@ class Coordinates
         public readonly string $latitude,
         public readonly string $longitude,
     ) {}
+
+    public function toArray(): array
+    {
+        return [
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+        ];
+    }
 }

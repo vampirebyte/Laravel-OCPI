@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Str;
 use Ocpi\Models\Party;
 use Ocpi\Modules\Cpo\Cdrs\Client\Resource as CpoCdrsResource;
+use Ocpi\Modules\Cpo\Locations\Client\Resource as CpoLocationsResource;
 use Ocpi\Modules\Cpo\Sessions\Client\Resource as CpoSessionsResource;
+use Ocpi\Modules\Cpo\Tariffs\Client\Resource as CpoTariffsResource;
 use Ocpi\Modules\Emsp\Cdrs\Client\Resource as CdrsResource;
 use Ocpi\Modules\Emsp\Commands\Client\Resource as CommandsResource;
 use Ocpi\Modules\Shared\Credentials\Client\Resource as CredentialsResource;
@@ -124,6 +126,16 @@ class Client extends Connector
     public function cpoCdrs(): CpoCdrsResource
     {
         return new CpoCdrsResource($this);
+    }
+
+    public function cpoLocations(): CpoLocationsResource
+    {
+        return new CpoLocationsResource($this);
+    }
+
+    public function cpoTariffs(): CpoTariffsResource
+    {
+        return new CpoTariffsResource($this);
     }
 
     public function versions(): VersionsResource
