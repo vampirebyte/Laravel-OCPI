@@ -11,14 +11,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Ocpi\Models\Party;
 use Ocpi\Models\PartyRole;
-use Ocpi\Support\Enums\OcpiClientErrorCode;
-use Ocpi\Support\Enums\OcpiServerErrorCode;
-use Ocpi\Support\Server\Controllers\Controller;
-
 use Ocpi\Modules\Cpo\Credentials\Actions\Party\SelfCredentialsGetAction;
 use Ocpi\Modules\Cpo\Credentials\Events;
 use Ocpi\Modules\Cpo\Credentials\Validators\V2_1_1\CredentialsValidator;
 use Ocpi\Modules\Shared\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
+use Ocpi\Support\Enums\OcpiClientErrorCode;
+use Ocpi\Support\Enums\OcpiServerErrorCode;
+use Ocpi\Support\Server\Controllers\Controller;
 
 class PostController extends Controller
 {
@@ -72,7 +71,7 @@ class PostController extends Controller
                         $partyRole = new PartyRole;
                         $partyRole->fill([
                             'code' => $request->input('party_id'),
-                            'role' => 'CPO',
+                            'role' => 'EMSP',
                             'country_code' => $request->input('country_code'),
                             'business_details' => $request->input('business_details'),
                         ]);
@@ -80,7 +79,7 @@ class PostController extends Controller
                         $party->roles()->save($partyRole);
                     } else {
                         $partyRole->fill([
-                            'role' => 'CPO',
+                            'role' => 'EMSP',
                             'business_details' => $request->input('business_details'),
                         ]);
 

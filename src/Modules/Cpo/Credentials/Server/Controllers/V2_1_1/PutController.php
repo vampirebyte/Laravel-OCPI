@@ -67,7 +67,7 @@ class PutController extends Controller
                         $partyRole = new PartyRole;
                         $partyRole->fill([
                             'code' => $request->input('party_id'),
-                            'role' => 'CPO',
+                            'role' => 'EMSP',
                             'country_code' => $request->input('country_code'),
                             'business_details' => $request->input('business_details'),
                         ]);
@@ -75,7 +75,7 @@ class PutController extends Controller
                         $party->roles()->save($partyRole);
                     } else {
                         $partyRole->fill([
-                            'role' => 'CPO',
+                            'role' => 'EMSP',
                             'business_details' => $request->input('business_details'),
                         ]);
 
