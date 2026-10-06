@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Ocpi\Support\Server\Middlewares\Cpo\IdentifyParty;
+use Ocpi\Support\Server\Middlewares\Cpo\IdentifyVersion;
 use Ocpi\Support\Server\Middlewares\LogRequest;
 
 Route::middleware(['api', LogRequest::class, IdentifyParty::class])
@@ -17,11 +17,7 @@ Route::middleware(['api', LogRequest::class, IdentifyParty::class])
             }
 
             Route::prefix($version)
-                ->middleware(function ($request, $next) use ($version) {
-                    Context::add('ocpi_version', $version);
-
-                    return $next($request);
-                })
+                ->middleware(IdentifyVersion::class.':'.$version)
                 ->group(function () use ($version, $modules) {
                     foreach ($modules as $module) {
                         // Credentials is version-parameterized already and loaded once, unconditionally.

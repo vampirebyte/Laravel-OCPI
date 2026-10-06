@@ -15,6 +15,7 @@ use Ocpi\Modules\Emsp\Commands\Client\Resource as CommandsResource;
 use Ocpi\Modules\Shared\Credentials\Client\Resource as CredentialsResource;
 use Ocpi\Modules\Emsp\Locations\Client\Resource as LocationsResource;
 use Ocpi\Modules\Emsp\Sessions\Client\Resource as SessionsResource;
+use Ocpi\Modules\Emsp\Tariffs\Client\Resource as TariffsResource;
 use Ocpi\Modules\Shared\Versions\Client\Resource as VersionsResource;
 use Ocpi\Support\Client\Middlewares\LogRequest;
 use Ocpi\Support\Client\Middlewares\LogResponse;
@@ -116,6 +117,11 @@ class Client extends Connector
     public function sessions(): SessionsResource
     {
         return new SessionsResource($this);
+    }
+
+    public function tariffs(): TariffsResource
+    {
+        return new TariffsResource($this);
     }
 
     public function cpoSessions(): CpoSessionsResource

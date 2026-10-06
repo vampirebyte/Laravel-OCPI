@@ -31,6 +31,7 @@ return [
                 'credentials',
                 'locations',
                 'sessions',
+                'tariffs',
             ],
         ],
     ],

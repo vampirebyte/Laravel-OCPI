@@ -11,6 +11,7 @@ use Ocpi\Modules\Emsp\Credentials\Console\Commands\Initialize as ModuleCredentia
 use Ocpi\Modules\Emsp\Credentials\Console\Commands\Register as ModuleCredentialsRegister;
 use Ocpi\Modules\Emsp\Credentials\Console\Commands\Update as ModuleCredentialsUpdate;
 use Ocpi\Modules\Emsp\Locations\Console\Commands\Synchronize as ModuleLocationsSynchronize;
+use Ocpi\Modules\Emsp\Tariffs\Console\Commands\Synchronize as ModuleTariffsSynchronize;
 use Ocpi\Modules\Emsp\Versions\Console\Commands\Update as ModuleVersionsUpdate;
 use Ocpi\Modules\Cpo\Credentials\Console\Commands\Initialize as CpoModuleCredentialsInitialize;
 use Ocpi\Modules\Cpo\Credentials\Console\Commands\Register as CpoModuleCredentialsRegister;
@@ -101,6 +102,7 @@ class OcpiServiceProvider extends ServiceProvider
             ModuleCredentialsRegister::class,
             ModuleCredentialsUpdate::class,
             ModuleLocationsSynchronize::class,
+            ModuleTariffsSynchronize::class,
             CpoModuleCredentialsInitialize::class,
             CpoModuleCredentialsRegister::class,
             CpoModuleCredentialsRegisterManual::class,

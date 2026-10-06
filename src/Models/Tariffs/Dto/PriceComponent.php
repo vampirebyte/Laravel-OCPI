@@ -1,6 +1,6 @@
 <?php
 
-namespace Ocpi\Models\Cpo\Dto;
+namespace Ocpi\Models\Tariffs\Dto;
 
 class PriceComponent
 {
@@ -10,6 +10,16 @@ class PriceComponent
         public readonly int $stepSize,
         public readonly ?float $vat = null,
     ) {}
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            type: (string) $data['type'],
+            price: (float) $data['price'],
+            stepSize: (int) ($data['step_size'] ?? 1),
+            vat: isset($data['vat']) ? (float) $data['vat'] : null,
+        );
+    }
 
     public function toArray(): array
     {
