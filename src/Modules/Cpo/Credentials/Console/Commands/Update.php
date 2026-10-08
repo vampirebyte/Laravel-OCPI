@@ -7,8 +7,9 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\DB;
 use Ocpi\Models\Party;
+use Ocpi\Modules\Cpo\Credentials\Actions\Party\PartyRolesSynchronizeAction;
 use Ocpi\Modules\Cpo\Credentials\Actions\Party\SelfCredentialsGetAction;
-use Ocpi\Modules\Cpo\Credentials\Validators\V2_1_1\CredentialsValidator;
+use Ocpi\Modules\Cpo\Credentials\Validators\CredentialsValidator;
 use Ocpi\Modules\Shared\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
 use Ocpi\Support\Client\Client;
 
@@ -20,6 +21,7 @@ class Update extends Command implements PromptsForMissingInput
 
     public function handle(
         VersionsPartyInformationAndDetailsSynchronizeAction $versionsPartyInformationAndDetailsSynchronizeAction,
+        PartyRolesSynchronizeAction $partyRolesSynchronizeAction,
         SelfCredentialsGetAction $selfCredentialsGetAction,
     ) {
         $partyCode = $this->argument('party_code');
@@ -58,11 +60,13 @@ class Update extends Command implements PromptsForMissingInput
             $this->info('  - Call EMSP OCPI - PUT - Credentials endpoint with new Client Token');
             $ocpiClient = new Client($party, 'credentials');
             $credentialsPutData = $ocpiClient->credentials()->put($selfCredentialsGetAction->handle($party));
-            $credentialsInput = CredentialsValidator::validate($credentialsPutData ?? []);
+            $credentialsInput = CredentialsValidator::validate($credentialsPutData ?? [], $party->version);
 
             $this->info('  - Store received OCPI Server Token: '.$credentialsInput['token']);
-            $party->server_token = Party::decodeToken($credentialsInput['token'], $party);
+            $party->server_token = $credentialsInput['token'];
             $party->save();
+
+            $partyRolesSynchronizeAction->handle($party, $credentialsInput['roles']);
 
             DB::connection(config('ocpi.database.connection'))->commit();
 

@@ -10,7 +10,11 @@ use Ocpi\Support\Client\Client as OcpiClient;
 
 class PartyInformationAndDetailsSynchronizeAction
 {
-    public function handle(Party $party, string $configKey = 'ocpi-emsp'): Party
+    /**
+     * Sync the Party versions and endpoints. A preferred version (e.g. the one a Party used to call
+     * our Credentials endpoint) wins over the latest mutual version when both sides support it.
+     */
+    public function handle(Party $party, string $configKey = 'ocpi-emsp', ?string $preferredVersion = null): Party
     {
         // OCPI GET call for Versions Information of the Party, store OCPI version and URL.
         Log::channel('ocpi')->info('Party '.$party->code.' - OCPI GET call for Versions Information of the Party on '.$party->url);
@@ -41,12 +45,16 @@ class PartyInformationAndDetailsSynchronizeAction
             new Exception('Party '.$party->code.' - No valid version found for Party.')
         );
 
-        // Find latest mutual OCPI version.
+        // Find preferred, otherwise latest mutual OCPI version.
         $latestMutualVersion = null;
-        foreach ($partyVersionList as $version => $item) {
-            if (in_array($version, $supportedVersionList)) {
-                $latestMutualVersion = $item;
-                break;
+        if ($preferredVersion !== null && in_array($preferredVersion, $supportedVersionList) && isset($partyVersionList[$preferredVersion])) {
+            $latestMutualVersion = $partyVersionList[$preferredVersion];
+        } else {
+            foreach ($partyVersionList as $version => $item) {
+                if (in_array($version, $supportedVersionList)) {
+                    $latestMutualVersion = $item;
+                    break;
+                }
             }
         }
         throw_if(

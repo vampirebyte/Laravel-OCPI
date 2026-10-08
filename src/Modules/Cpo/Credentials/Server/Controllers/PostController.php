@@ -1,6 +1,6 @@
 <?php
 
-namespace Ocpi\Modules\Cpo\Credentials\Server\Controllers\V2_1_1;
+namespace Ocpi\Modules\Cpo\Credentials\Server\Controllers;
 
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -10,24 +10,26 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Ocpi\Models\Party;
-use Ocpi\Models\PartyRole;
+use Ocpi\Modules\Cpo\Credentials\Actions\Party\PartyRolesSynchronizeAction;
 use Ocpi\Modules\Cpo\Credentials\Actions\Party\SelfCredentialsGetAction;
 use Ocpi\Modules\Cpo\Credentials\Events;
-use Ocpi\Modules\Cpo\Credentials\Validators\V2_1_1\CredentialsValidator;
+use Ocpi\Modules\Cpo\Credentials\Validators\CredentialsValidator;
 use Ocpi\Modules\Shared\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
 use Ocpi\Support\Enums\OcpiClientErrorCode;
 use Ocpi\Support\Enums\OcpiServerErrorCode;
 use Ocpi\Support\Server\Controllers\Controller;
 
-class PutController extends Controller
+class PostController extends Controller
 {
     public function __invoke(
         Request $request,
+        string $version,
         VersionsPartyInformationAndDetailsSynchronizeAction $versionsPartyInformationAndDetailsSynchronizeAction,
+        PartyRolesSynchronizeAction $partyRolesSynchronizeAction,
         SelfCredentialsGetAction $selfCredentialsGetAction,
     ): JsonResponse {
         try {
-            $input = CredentialsValidator::validate($request->all());
+            $input = CredentialsValidator::validate($request->all(), $version);
             $partyCode = Context::get('cpo_party_code');
 
             $party = Party::with(['roles'])->where('code', $partyCode)->first();
@@ -39,60 +41,37 @@ class PutController extends Controller
                 );
             }
 
-            if ($party->registered === false) {
+            if ($party->registered === true) {
                 return $this->ocpiServerErrorResponse(
                     statusCode: OcpiServerErrorCode::PartyApiUnusable,
-                    statusMessage: 'EMSP Client not registered.',
+                    statusMessage: 'EMSP Client already registered.',
                     httpCode: 405,
                 );
             }
 
             $party = DB::connection(config('ocpi.database.connection'))
-                ->transaction(function () use ($party, $request, $input, $versionsPartyInformationAndDetailsSynchronizeAction) {
-                    $party->server_token = Party::decodeToken($input['token'], $party);
-                    $party->url = $request->input('url');
+                ->transaction(function () use ($party, $input, $version, $versionsPartyInformationAndDetailsSynchronizeAction, $partyRolesSynchronizeAction) {
+                    // Update Server Token, url for the Party and mark it as registered.
+                    $party->server_token = $input['token'];
+                    $party->url = $input['url'];
+                    $party->registered = true;
 
-                    $party = $versionsPartyInformationAndDetailsSynchronizeAction->handle($party, 'ocpi-cpo');
+                    // OCPI GET calls for Versions Information and Details of the Party, store OCPI endpoints.
+                    $party = $versionsPartyInformationAndDetailsSynchronizeAction->handle($party, 'ocpi-cpo', $version);
 
-                    $partyRole = $party->roles
-                        ->where('code', $request->input('party_id'))
-                        ->where('country_code', $request->input('country_code'))
-                        ->first();
+                    $partyRolesSynchronizeAction->handle($party, $input['roles']);
 
-                    if ($partyRole === null) {
-                        if ($party->roles->count() > 0) {
-                            $party->roles()->delete();
-                        }
-
-                        $partyRole = new PartyRole;
-                        $partyRole->fill([
-                            'code' => $request->input('party_id'),
-                            'role' => 'EMSP',
-                            'country_code' => $request->input('country_code'),
-                            'business_details' => $request->input('business_details'),
-                        ]);
-
-                        $party->roles()->save($partyRole);
-                    } else {
-                        $partyRole->fill([
-                            'role' => 'EMSP',
-                            'business_details' => $request->input('business_details'),
-                        ]);
-
-                        $partyRole->save();
-                        $party->touch();
-                    }
-
+                    // Generate new Client Token for the Party.
                     $party->client_token = $party->generateToken();
                     $party->save();
 
                     return $party;
                 });
 
-            Events\CredentialsUpdated::dispatch($party->id, $request->json()->all());
+            Events\CredentialsCreated::dispatch($party->id, $request->json()->all());
 
-            return $this->ocpiSuccessResponse(
-                $selfCredentialsGetAction->handle($party)
+            return $this->ocpiCreatedResponse(
+                $selfCredentialsGetAction->handle($party, $version)
             );
         } catch (ValidationException $e) {
             Log::channel('ocpi')->error($e->getMessage());

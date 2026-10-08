@@ -12,7 +12,7 @@ use Ocpi\Support\Server\Controllers\Controller;
 
 class GetController extends Controller
 {
-    public function __invoke(Request $request, SelfCredentialsGetAction $selfCredentialsGetAction): JsonResponse
+    public function __invoke(Request $request, string $version, SelfCredentialsGetAction $selfCredentialsGetAction): JsonResponse
     {
         $party = Party::where('code', Context::get('cpo_party_code'))->first();
         if ($party === null) {
@@ -21,7 +21,7 @@ class GetController extends Controller
             );
         }
 
-        $data = $selfCredentialsGetAction->handle($party);
+        $data = $selfCredentialsGetAction->handle($party, $version);
 
         return $data
             ? $this->ocpiSuccessResponse($data)

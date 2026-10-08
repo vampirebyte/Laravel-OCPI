@@ -25,7 +25,7 @@ Route::middleware(['api', LogRequest::class, IdentifyParty::class])
                             continue;
                         }
 
-                        $path = __DIR__.'/../../Modules/Cpo/'.Str::ucfirst($module).'/Server/Endpoints/'.$version.'.php';
+                        $path = __DIR__.'/../../../Modules/Cpo/'.Str::ucfirst($module).'/Server/Endpoints/'.$version.'.php';
 
                         if (file_exists($path)) {
                             Route::middleware([])->group($path);

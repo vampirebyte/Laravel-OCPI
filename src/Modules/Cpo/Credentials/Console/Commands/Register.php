@@ -7,9 +7,9 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\DB;
 use Ocpi\Models\Party;
-use Ocpi\Models\PartyRole;
+use Ocpi\Modules\Cpo\Credentials\Actions\Party\PartyRolesSynchronizeAction;
 use Ocpi\Modules\Cpo\Credentials\Actions\Party\SelfCredentialsGetAction;
-use Ocpi\Modules\Cpo\Credentials\Validators\V2_1_1\CredentialsValidator;
+use Ocpi\Modules\Cpo\Credentials\Validators\CredentialsValidator;
 use Ocpi\Modules\Shared\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
 use Ocpi\Support\Client\Client;
 
@@ -36,6 +36,7 @@ class Register extends Command implements PromptsForMissingInput
      */
     public function handle(
         VersionsPartyInformationAndDetailsSynchronizeAction $versionsPartyInformationAndDetailsSynchronizeAction,
+        PartyRolesSynchronizeAction $partyRolesSynchronizeAction,
         SelfCredentialsGetAction $selfCredentialsGetAction,
     ): int {
         $partyCode = $this->argument('party_code');
@@ -87,14 +88,14 @@ class Register extends Command implements PromptsForMissingInput
             $this->info('  - Call EMSP OCPI - POST - Credentials endpoint with new Client Token');
             $ocpiClient = new Client($party, 'credentials');
             $credentialsPostData = $ocpiClient->credentials()->post($selfCredentialsGetAction->handle($party));
-            $credentialsInput = CredentialsValidator::validate($credentialsPostData ?? []);
+            $credentialsInput = CredentialsValidator::validate($credentialsPostData ?? [], $party->version);
 
             $this->info('  - Store received OCPI Server Token: '.$credentialsInput['token'].', mark the EMSP Party as registered');
-            $party->server_token = Party::decodeToken($credentialsInput['token'], $party);
+            $party->server_token = $credentialsInput['token'];
             $party->registered = true;
             $party->save();
 
-            $this->syncPartyRole($party, $credentialsInput);
+            $partyRolesSynchronizeAction->handle($party, $credentialsInput['roles']);
 
             $connection->commit();
 
@@ -108,33 +109,6 @@ class Register extends Command implements PromptsForMissingInput
 
             return Command::FAILURE;
         }
-    }
-
-    /**
-     * Store the EMSP role returned in the credentials response.
-     *
-     * @param  array{party_id: string, country_code: string, business_details: array<string, mixed>}  $credentialsInput
-     */
-    protected function syncPartyRole(Party $party, array $credentialsInput): void
-    {
-        $partyRole = $party->roles
-            ->where('code', $credentialsInput['party_id'])
-            ->where('country_code', $credentialsInput['country_code'])
-            ->first();
-
-        if ($partyRole === null) {
-            $party->roles()->delete();
-            $partyRole = new PartyRole;
-            $partyRole->code = $credentialsInput['party_id'];
-            $partyRole->country_code = $credentialsInput['country_code'];
-        }
-
-        $partyRole->fill([
-            'role' => 'EMSP',
-            'business_details' => $credentialsInput['business_details'],
-        ]);
-
-        $party->roles()->save($partyRole);
     }
 
     /**
