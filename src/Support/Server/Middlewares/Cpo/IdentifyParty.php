@@ -21,10 +21,11 @@ class IdentifyParty
         // Retrieve Authorization Token from header.
         $clientToken = $this->token($request, 'Token');
         if ($clientToken === null) {
-            return $this->ocpiClientErrorResponse(
+            return $this->withRequestIds($request, $this->ocpiClientErrorResponse(
                 statusCode: OcpiClientErrorCode::NotEnoughInformation,
                 statusMessage: 'Authorization is missing.',
-            );
+                httpCode: 401,
+            ));
         }
         $clientToken = Str::rtrim($clientToken);
 
@@ -39,10 +40,11 @@ class IdentifyParty
             ->first();
 
         if ($party === null) {
-            return $this->ocpiClientErrorResponse(
+            return $this->withRequestIds($request, $this->ocpiClientErrorResponse(
                 statusCode: OcpiClientErrorCode::InvalidParameters,
                 statusMessage: 'Invalid Authorization Token or Party.',
-            );
+                httpCode: 401,
+            ));
         }
 
         // Add information to Context.
@@ -50,7 +52,22 @@ class IdentifyParty
         Context::add('cpo_party_code', $party->code);
         Context::addHidden('cpo_party', $party);
 
-        return $next($request);
+        return $this->withRequestIds($request, $next($request));
+    }
+
+    /**
+     * OCPI 2.2+: a response carries the X-Request-ID and X-Correlation-ID of
+     * the request it answers.
+     */
+    private function withRequestIds(Request $request, Response $response): Response
+    {
+        foreach (['X-Request-ID', 'X-Correlation-ID'] as $header) {
+            if ($request->hasHeader($header)) {
+                $response->headers->set($header, $request->header($header));
+            }
+        }
+
+        return $response;
     }
 
     /**

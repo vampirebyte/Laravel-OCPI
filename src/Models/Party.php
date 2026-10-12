@@ -14,6 +14,15 @@ class Party extends Model
 {
     use SoftDeletes;
 
+    /**
+     * The OCPI credentials tokens never leave in a serialized party - e.g. a
+     * command DTO stored as JSON by the host application.
+     */
+    protected $hidden = [
+        'server_token',
+        'client_token',
+    ];
+
     protected $fillable = [
         'code',
         'name',

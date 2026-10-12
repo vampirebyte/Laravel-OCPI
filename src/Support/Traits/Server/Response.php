@@ -27,7 +27,7 @@ trait Response
 
     protected function ocpiServerErrorResponse(OcpiServerErrorCode $statusCode = OcpiServerErrorCode::Generic, $statusMessage = 'Error', int $httpCode = 400): JsonResponse
     {
-        return $this->ocpiResponse(httpCode: $httpCode, statusCode: 3000, statusMessage: $statusMessage);
+        return $this->ocpiResponse(httpCode: $httpCode, statusCode: $statusCode, statusMessage: $statusMessage);
     }
 
     protected function ocpiResponse(mixed $data = null, $httpCode = null, $statusCode = null, $statusMessage = null): JsonResponse

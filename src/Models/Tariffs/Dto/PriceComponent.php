@@ -21,7 +21,10 @@ class PriceComponent
         );
     }
 
-    public function toArray(): array
+    /**
+     * `vat` exists from OCPI 2.2 - a 2.1.1 price component has none.
+     */
+    public function toArray(string $version = '2.2.1'): array
     {
         $data = [
             'type' => $this->type,
@@ -29,7 +32,7 @@ class PriceComponent
             'step_size' => $this->stepSize,
         ];
 
-        if ($this->vat !== null) {
+        if ($this->vat !== null && version_compare($version, '2.2', '>=')) {
             $data['vat'] = $this->vat;
         }
 

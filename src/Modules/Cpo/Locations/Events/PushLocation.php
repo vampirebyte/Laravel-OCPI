@@ -7,15 +7,22 @@ use Ocpi\Support\Client\Client;
 
 class PushLocation
 {
+    /**
+     * $payload is a Location in the shape of the receiving party's version
+     * (see Ocpi\Models\Cpo\Dto\Location). Only from OCPI 2.2 does it carry
+     * country_code / party_id - our own, filled in when missing.
+     */
     public function push(array $payload, string $receiverPartyId, string $locationId): mixed
     {
         $party = Party::where('code', $receiverPartyId)->firstOrFail();
 
-        $payload = array_merge([
-            'party_id' => config('ocpi-cpo.party.party_id'),
-            'country_code' => config('ocpi-cpo.party.country_code'),
-            'last_updated' => now()->toIso8601String(),
-        ], $payload);
+        $defaults = ['last_updated' => now()->toIso8601String()];
+        if (version_compare((string) $party->version, '2.2', '>=')) {
+            $defaults['party_id'] = config('ocpi-cpo.party.party_id');
+            $defaults['country_code'] = config('ocpi-cpo.party.country_code');
+        }
+
+        $payload = array_merge($defaults, $payload);
 
         return (new Client($party, 'locations'))
             ->cpoLocations()

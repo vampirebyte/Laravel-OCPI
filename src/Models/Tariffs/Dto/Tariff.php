@@ -2,11 +2,12 @@
 
 namespace Ocpi\Models\Tariffs\Dto;
 
+use Ocpi\Models\Cpo\Contracts\OcpiObject;
 /**
  * OCPI Tariff object, shared by both roles: the CPO builds it from its own
  * tariffs to push them, the eMSP reads the tariffs it received into it.
  */
-class Tariff
+class Tariff implements OcpiObject
 {
     /**
      * @param  TariffElement[]  $elements
@@ -41,11 +42,24 @@ class Tariff
         );
     }
 
-    public function toArray(): array
+    /**
+     * In the shape of the version asked for: 2.1.1 tariffs have no
+     * country_code / party_id.
+     */
+    public function toArray(string $version = '2.2.1'): array
     {
         $elements = [];
         foreach ($this->elements as $element) {
-            $elements[] = $element->toArray();
+            $elements[] = $element->toArray($version);
+        }
+
+        if (version_compare($version, '2.2', '<')) {
+            return [
+                'id' => $this->id,
+                'currency' => $this->currency,
+                'elements' => $elements,
+                'last_updated' => $this->lastUpdated,
+            ];
         }
 
         return [

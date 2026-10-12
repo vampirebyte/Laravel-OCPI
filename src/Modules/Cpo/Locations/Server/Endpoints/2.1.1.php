@@ -5,3 +5,5 @@ use Ocpi\Modules\Cpo\Locations\Server\Controllers\LocationsController;
 
 Route::get('locations', [LocationsController::class, 'index'])->name('ocpi-cpo.locations.cpo-index');
 Route::get('locations/{locationId}', [LocationsController::class, 'show'])->name('ocpi-cpo.locations.cpo-show');
+Route::get('locations/{locationId}/{evseUid}', [LocationsController::class, 'showEvse'])->name('ocpi-cpo.locations.cpo-show-evse');
+Route::get('locations/{locationId}/{evseUid}/{connectorId}', [LocationsController::class, 'showConnector'])->name('ocpi-cpo.locations.cpo-show-connector');

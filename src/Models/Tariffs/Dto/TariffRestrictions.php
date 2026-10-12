@@ -64,7 +64,11 @@ class TariffRestrictions
         return new self(...$arguments);
     }
 
-    public function toArray(): array
+    /**
+     * The fields above are the same in 2.1.1 and 2.2.1; extensions are only
+     * sent from 2.2, as for connectors.
+     */
+    public function toArray(string $version = '2.2.1'): array
     {
         $data = [];
         foreach (self::FIELDS as $field => $property) {
@@ -73,7 +77,7 @@ class TariffRestrictions
             }
         }
 
-        if ($this->extensions !== null) {
+        if ($this->extensions !== null && version_compare($version, '2.2', '>=')) {
             $data = array_merge($data, $this->extensions);
         }
 

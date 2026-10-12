@@ -19,6 +19,45 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Commands
+    |--------------------------------------------------------------------------
+    |
+    | OCPI 2.2.1: seconds the eMSP should wait for the asynchronous result of a
+    | command, sent as `timeout` in the CommandResponse.
+    */
+
+    'commands' => [
+        'timeout' => (int) env('OCPI_CPO_COMMANDS_TIMEOUT', 30),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | CDRs
+    |--------------------------------------------------------------------------
+    |
+    | ocpi:cdrs:cpo_retry_unsent sends again the CDRs an eMSP has not accepted:
+    | the ones older than retry_after_minutes, for retry_for_days.
+    */
+
+    'cdrs' => [
+        'retry_after_minutes' => (int) env('OCPI_CPO_CDRS_RETRY_AFTER_MINUTES', 5),
+        'retry_for_days' => (int) env('OCPI_CPO_CDRS_RETRY_FOR_DAYS', 3),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination
+    |--------------------------------------------------------------------------
+    |
+    | Most objects a GET list endpoint returns per page - a larger `limit` is cut down.
+    */
+
+    'pagination' => [
+        'max_limit' => (int) env('OCPI_CPO_PAGINATION_MAX_LIMIT', 100),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Versions
     |--------------------------------------------------------------------------
     */

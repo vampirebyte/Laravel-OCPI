@@ -24,5 +24,16 @@ class CommandRequest
         public readonly ?string $sessionId = null,
         public readonly ?string $reservationId = null,
         public readonly ?string $expiryDate = null,
+
+        /**
+         * OCPI 2.2.1 START_SESSION / RESERVE_NOW: reference the eMSP gives the
+         * authorization, to be sent back on the Session and CDR.
+         */
+        public readonly ?string $authorizationReference = null,
+
+        /**
+         * The OCPI version the command was received on.
+         */
+        public readonly string $version = '2.2.1',
     ) {}
 }

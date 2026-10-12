@@ -10,6 +10,7 @@ use Ocpi\Modules\Cpo\Cdrs\Client\Resource as CpoCdrsResource;
 use Ocpi\Modules\Cpo\Locations\Client\Resource as CpoLocationsResource;
 use Ocpi\Modules\Cpo\Sessions\Client\Resource as CpoSessionsResource;
 use Ocpi\Modules\Cpo\Tariffs\Client\Resource as CpoTariffsResource;
+use Ocpi\Modules\Cpo\Tokens\Client\Resource as CpoTokensResource;
 use Ocpi\Modules\Emsp\Cdrs\Client\Resource as CdrsResource;
 use Ocpi\Modules\Emsp\Commands\Client\Resource as CommandsResource;
 use Ocpi\Modules\Shared\Credentials\Client\Resource as CredentialsResource;
@@ -49,11 +50,18 @@ class Client extends Connector
         return [];
     }
 
+    /**
+     * X-Request-ID and X-Correlation-ID are required from OCPI 2.2 and
+     * harmless before: a new id per request, the trace id of this call chain
+     * as correlation id.
+     */
     protected function defaultHeaders(): array
     {
         return [
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
+            'X-Request-ID' => Str::uuid()->toString(),
+            'X-Correlation-ID' => (string) Context::get('trace_id', Str::uuid()->toString()),
         ];
     }
 
@@ -142,6 +150,11 @@ class Client extends Connector
     public function cpoTariffs(): CpoTariffsResource
     {
         return new CpoTariffsResource($this);
+    }
+
+    public function cpoTokens(): CpoTokensResource
+    {
+        return new CpoTokensResource($this);
     }
 
     public function versions(): VersionsResource

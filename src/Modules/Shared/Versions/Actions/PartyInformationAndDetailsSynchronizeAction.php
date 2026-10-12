@@ -18,8 +18,7 @@ class PartyInformationAndDetailsSynchronizeAction
     {
         // OCPI GET call for Versions Information of the Party, store OCPI version and URL.
         Log::channel('ocpi')->info('Party '.$party->code.' - OCPI GET call for Versions Information of the Party on '.$party->url);
-        $ocpiClient = new OcpiClient($party, 'versions.information');
-        $versionList = $ocpiClient->versions()->information();
+        [$ocpiClient, $versionList] = $this->versionsInformation($party);
         throw_if(
             ! is_array($versionList),
             new Exception('Party '.$party->code.' - Empty or invalid response for Versions Information.')
@@ -85,9 +84,7 @@ class PartyInformationAndDetailsSynchronizeAction
 
         // Set Party OCPI endpoints for version.
         Log::channel('ocpi')->info('Party '.$party->code.' - Set OCPI endpoints for version '.$party->version);
-        $party->endpoints = collect($versionDetails['endpoints'])
-            ->pluck('url', 'identifier')
-            ->toArray();
+        $party->endpoints = $this->endpointUrls($versionDetails['endpoints'], $configKey, $party->version);
         throw_if(
             ! Arr::has($party->endpoints, 'credentials'),
             new Exception('Party '.$party->code.' - Missing required `credentials` Module endpoint.')
@@ -99,5 +96,59 @@ class PartyInformationAndDetailsSynchronizeAction
         );
 
         return $party;
+    }
+
+    /**
+     * The first call to a party is made before its version is known, so the
+     * token goes out as is. A 2.2+ party expects it base64 encoded: when the
+     * plain token is refused, it is tried once more encoded.
+     *
+     * @return array{0: OcpiClient, 1: mixed}
+     */
+    private function versionsInformation(Party $party): array
+    {
+        $ocpiClient = new OcpiClient($party, 'versions.information');
+
+        try {
+            return [$ocpiClient, $ocpiClient->versions()->information()];
+        } catch (Exception $exception) {
+            if ($party->version !== null) {
+                throw $exception;
+            }
+
+            Log::channel('ocpi')->info('Party '.$party->code.' - plain token refused, trying it base64 encoded (OCPI 2.2+)');
+            $party->version = '2.2';
+            $ocpiClient = new OcpiClient($party, 'versions.information');
+
+            return [$ocpiClient, $ocpiClient->versions()->information()];
+        }
+    }
+
+    /**
+     * Endpoint URL per module. From 2.2 a party may list a module twice, as
+     * SENDER and as RECEIVER: the one we talk to is the counterpart of our own
+     * role for that module (we push to its RECEIVER, pull from its SENDER).
+     *
+     * @param  array<int, array{identifier: string, url: string, role?: string}>  $endpoints
+     * @return array<string, string>
+     */
+    private function endpointUrls(array $endpoints, string $configKey, string $version): array
+    {
+        $urls = [];
+        $counterpartRoles = ['SENDER' => 'RECEIVER', 'RECEIVER' => 'SENDER'];
+
+        foreach ($endpoints as $endpoint) {
+            $identifier = $endpoint['identifier'];
+            // versions are keyed "2.1.1": read the list, the dots are not config nesting
+            $ourRole = config("{$configKey}.versions")[$version]['modules'][$identifier]['role'] ?? null;
+            $wantedRole = $counterpartRoles[$ourRole] ?? null;
+
+            // Keep the first URL, unless this one has the role we want.
+            if (! isset($urls[$identifier]) || ($wantedRole !== null && ($endpoint['role'] ?? null) === $wantedRole)) {
+                $urls[$identifier] = $endpoint['url'];
+            }
+        }
+
+        return $urls;
     }
 }

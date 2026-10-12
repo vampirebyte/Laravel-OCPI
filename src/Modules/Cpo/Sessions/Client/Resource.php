@@ -13,4 +13,12 @@ class Resource extends OcpiResource
             endpoint: "{$countryCode}/{$partyId}/{$sessionId}",
         );
     }
+
+    public function patch(array $payload, string $countryCode, string $partyId, string $sessionId): array|string|null
+    {
+        return $this->requestPatchSend(
+            payload: $payload,
+            endpoint: "{$countryCode}/{$partyId}/{$sessionId}",
+        );
+    }
 }

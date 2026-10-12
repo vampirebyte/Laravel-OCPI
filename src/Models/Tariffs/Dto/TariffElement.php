@@ -25,11 +25,11 @@ class TariffElement
         );
     }
 
-    public function toArray(): array
+    public function toArray(string $version = '2.2.1'): array
     {
         $priceComponents = [];
         foreach ($this->priceComponents as $priceComponent) {
-            $priceComponents[] = $priceComponent->toArray();
+            $priceComponents[] = $priceComponent->toArray($version);
         }
 
         $data = [
@@ -37,7 +37,7 @@ class TariffElement
         ];
 
         if ($this->restrictions !== null) {
-            $data['restrictions'] = $this->restrictions->toArray();
+            $data['restrictions'] = $this->restrictions->toArray($version);
         }
 
         return $data;

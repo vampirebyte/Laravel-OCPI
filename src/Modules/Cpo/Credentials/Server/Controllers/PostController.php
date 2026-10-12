@@ -57,6 +57,8 @@ class PostController extends Controller
                     $party->registered = true;
 
                     // OCPI GET calls for Versions Information and Details of the Party, store OCPI endpoints.
+                    // The version it called us on: our first calls back already encode the token for it.
+                    $party->version = $version;
                     $party = $versionsPartyInformationAndDetailsSynchronizeAction->handle($party, 'ocpi-cpo', $version);
 
                     $partyRolesSynchronizeAction->handle($party, $input['roles']);

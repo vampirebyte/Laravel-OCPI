@@ -54,6 +54,8 @@ class PutController extends Controller
                     $party->server_token = $input['token'];
                     $party->url = $input['url'];
 
+                    // The version it called us on: our first calls back already encode the token for it.
+                    $party->version = $version;
                     $party = $versionsPartyInformationAndDetailsSynchronizeAction->handle($party, 'ocpi-cpo', $version);
 
                     $partyRolesSynchronizeAction->handle($party, $input['roles']);

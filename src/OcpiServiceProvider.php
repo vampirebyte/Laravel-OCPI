@@ -6,7 +6,13 @@ namespace Ocpi;
 
 use Illuminate\Support\ServiceProvider;
 use Ocpi\Models\Cpo\Contracts\LocationRepository;
+use Ocpi\Models\Cpo\Contracts\TariffRepository;
+use Ocpi\Models\Cpo\Contracts\SessionRepository;
+use Ocpi\Models\Cpo\Contracts\CdrRepository;
 use Ocpi\Models\Cpo\Repository\NullLocationRepository;
+use Ocpi\Models\Cpo\Repository\NullTariffRepository;
+use Ocpi\Models\Cpo\Repository\NullSessionRepository;
+use Ocpi\Models\Cpo\Repository\StoredCdrRepository;
 use Ocpi\Modules\Emsp\Credentials\Console\Commands\Initialize as ModuleCredentialsInitialize;
 use Ocpi\Modules\Emsp\Credentials\Console\Commands\Register as ModuleCredentialsRegister;
 use Ocpi\Modules\Emsp\Credentials\Console\Commands\Update as ModuleCredentialsUpdate;
@@ -17,6 +23,7 @@ use Ocpi\Modules\Cpo\Credentials\Console\Commands\Initialize as CpoModuleCredent
 use Ocpi\Modules\Cpo\Credentials\Console\Commands\Register as CpoModuleCredentialsRegister;
 use Ocpi\Modules\Cpo\Credentials\Console\Commands\RegisterManual as CpoModuleCredentialsRegisterManual;
 use Ocpi\Modules\Cpo\Credentials\Console\Commands\Update as CpoModuleCredentialsUpdate;
+use Ocpi\Modules\Cpo\Cdrs\Console\Commands\RetryUnsent as CpoModuleCdrsRetryUnsent;
 
 class OcpiServiceProvider extends ServiceProvider
 {
@@ -26,6 +33,9 @@ class OcpiServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bindIf(LocationRepository::class, NullLocationRepository::class);
+        $this->app->bindIf(TariffRepository::class, NullTariffRepository::class);
+        $this->app->bindIf(SessionRepository::class, NullSessionRepository::class);
+        $this->app->bindIf(CdrRepository::class, StoredCdrRepository::class);
 
         $this->mergeConfigFrom(
             __DIR__ . '/../config/ocpi.php',
@@ -107,6 +117,7 @@ class OcpiServiceProvider extends ServiceProvider
             CpoModuleCredentialsRegister::class,
             CpoModuleCredentialsRegisterManual::class,
             CpoModuleCredentialsUpdate::class,
+            CpoModuleCdrsRetryUnsent::class,
         ]);
     }
 
