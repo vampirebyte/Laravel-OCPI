@@ -7,7 +7,6 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\DB;
 use Ocpi\Models\Party;
-use Ocpi\Models\PartyRole;
 
 class RegisterManual extends Command implements PromptsForMissingInput
 {
@@ -21,7 +20,7 @@ class RegisterManual extends Command implements PromptsForMissingInput
                             {--name= : Display name, e.g. "Nayax"}
                             {--party_id= : Their 3-char OCPI party_id, e.g. NAK}
                             {--country_code= : Their 2-char OCPI country code, e.g. IL}
-                            {--version=2.2.1 : Mutual OCPI version to record for this Party}
+                            {--ocpi-version=2.2.1 : Mutual OCPI version to record for this Party - not --version, which Artisan keeps for itself}
                             {--locations-url= : Their Locations module endpoint}
                             {--tariffs-url= : Their Tariffs module endpoint}
                             {--sessions-url= : Their Sessions module endpoint}
@@ -81,7 +80,7 @@ class RegisterManual extends Command implements PromptsForMissingInput
 
                 $party = Party::updateOrCreate(['code' => $code], [
                     'name' => $this->option('name') ?? $code,
-                    'version' => $this->option('version'),
+                    'version' => $this->option('ocpi-version'),
                     'registered' => true,
                     'endpoints' => $endpoints,
                     'server_token' => $serverToken,
@@ -90,8 +89,9 @@ class RegisterManual extends Command implements PromptsForMissingInput
                 $party->client_token = $this->option('client-token') ?? $party->client_token ?? $party->generateToken();
                 $party->save();
 
-                PartyRole::updateOrCreate(
-                    ['party_id' => $party->id, 'code' => $this->option('party_id')],
+                # through the relation: party_id is not mass assignable on PartyRole
+                $party->roles()->updateOrCreate(
+                    ['code' => $this->option('party_id')],
                     [
                         'role' => 'EMSP',
                         'country_code' => $this->option('country_code'),

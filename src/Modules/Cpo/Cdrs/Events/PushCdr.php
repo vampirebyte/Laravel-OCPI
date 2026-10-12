@@ -16,7 +16,7 @@ class PushCdr
     {
         $party = Party::where('code', $receiverPartyId)->firstOrFail();
 
-        $defaults = ['last_updated' => now()->toIso8601String()];
+        $defaults = ['last_updated' => now()->toIso8601ZuluString()];
         if (version_compare((string) $party->version, '2.2', '>=')) {
             $defaults['party_id'] = config('ocpi-cpo.party.party_id');
             $defaults['country_code'] = config('ocpi-cpo.party.country_code');

@@ -17,7 +17,7 @@ class PushSession
     {
         $party = Party::where('code', $receiverPartyId)->firstOrFail();
 
-        $defaults = ['last_updated' => now()->toIso8601String()];
+        $defaults = ['last_updated' => now()->toIso8601ZuluString()];
         if (version_compare((string) $party->version, '2.2', '>=')) {
             $defaults['country_code'] = config('ocpi-cpo.party.country_code');
             $defaults['party_id'] = config('ocpi-cpo.party.party_id');
@@ -43,7 +43,7 @@ class PushSession
         return (new Client($party, 'sessions'))
             ->cpoSessions()
             ->patch(
-                payload: array_merge(['last_updated' => now()->toIso8601String()], $fields),
+                payload: array_merge(['last_updated' => now()->toIso8601ZuluString()], $fields),
                 countryCode: config('ocpi-cpo.party.country_code'),
                 partyId: config('ocpi-cpo.party.party_id'),
                 sessionId: $sessionId,
