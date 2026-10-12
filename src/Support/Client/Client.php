@@ -74,9 +74,13 @@ class Client extends Connector
         };
     }
 
+    /**
+     * Failed unless a JSON OCPI response with a 1xxx status_code - the
+     * Content-Type may carry parameters, e.g. "application/json; charset=utf-8".
+     */
     public function hasRequestFailed(Response $response): ?bool
     {
-        if (in_array('application/json', [$response->header('Content-Type'), $response->header('content-type')])) {
+        if ($response->isJson()) {
             try {
                 $responseObject = $response->object();
 
