@@ -86,6 +86,8 @@ return [
                 'cdrs'        => ['role' => 'SENDER'],
                 'tokens'      => ['role' => 'RECEIVER'],
                 'commands'    => ['role' => 'RECEIVER'],
+                // DirectPayment extension: PTPs (payment terminal providers) push terminals and financial advice confirmations
+                'payments'    => ['role' => 'RECEIVER'],
             ],
         ],
     ],

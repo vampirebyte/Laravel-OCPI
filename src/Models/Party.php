@@ -108,6 +108,14 @@ class Party extends Model
         return false;
     }
 
+    /**
+     * Whether one of the party's roles is this one, e.g. PTP. Reads the loaded roles.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->roles->contains('role', $role);
+    }
+
     public static function encodeToken(string $token): string
     {
         return base64_encode($token);

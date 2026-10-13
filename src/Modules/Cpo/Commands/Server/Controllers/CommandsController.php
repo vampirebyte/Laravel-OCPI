@@ -48,7 +48,18 @@ class CommandsController extends Controller
             return $this->ocpiSuccessResponse((new CommandResponse('NOT_SUPPORTED'))->toArray($version));
         }
 
-        $validator = Validator::make($request->all(), $this->rules($type));
+        $rules = $this->rules($type);
+
+        // DirectPayment (payments module): a PTP's START_SESSION must name the EVSE and
+        // connector, and its authorization_reference - the end of the invoice URL.
+        // Every other party keeps the rules above.
+        if ($type === CommandType::START_SESSION && $party->hasRole('PTP')) {
+            $rules['evse_uid'] = ['required', 'string'];
+            $rules['connector_id'] = ['required', 'string'];
+            $rules['authorization_reference'] = ['required', 'string', 'max:36'];
+        }
+
+        $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return $this->ocpiClientErrorResponse(
                 statusCode: OcpiClientErrorCode::InvalidParameters,

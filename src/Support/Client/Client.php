@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Ocpi\Models\Party;
 use Ocpi\Modules\Cpo\Cdrs\Client\Resource as CpoCdrsResource;
 use Ocpi\Modules\Cpo\Locations\Client\Resource as CpoLocationsResource;
+use Ocpi\Modules\Cpo\Payments\Client\Resource as CpoPaymentsResource;
 use Ocpi\Modules\Cpo\Sessions\Client\Resource as CpoSessionsResource;
 use Ocpi\Modules\Cpo\Tariffs\Client\Resource as CpoTariffsResource;
 use Ocpi\Modules\Cpo\Tokens\Client\Resource as CpoTokensResource;
@@ -149,6 +150,11 @@ class Client extends Connector
     public function cpoLocations(): CpoLocationsResource
     {
         return new CpoLocationsResource($this);
+    }
+
+    public function cpoPayments(): CpoPaymentsResource
+    {
+        return new CpoPaymentsResource($this);
     }
 
     public function cpoTariffs(): CpoTariffsResource

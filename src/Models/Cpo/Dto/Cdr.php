@@ -24,6 +24,7 @@ class Cdr implements OcpiObject
      * @param  float  $totalEnergy  kWh
      * @param  float  $totalTime  hours
      * @param  float|null  $totalParkingTime  hours
+     * @param  string|null  $invoiceReferenceId  2.2+: our invoice of the session - set when we, not the PTP, invoice a session paid on a terminal
      */
     public function __construct(
         public readonly string $id,
@@ -49,6 +50,7 @@ class Cdr implements OcpiObject
         public readonly ?Price $totalTimeCost = null,
         public readonly ?Price $totalParkingCost = null,
         public readonly ?string $meterId = null,
+        public readonly ?string $invoiceReferenceId = null,
     ) {}
 
     public function toArray(string $version): array
@@ -96,6 +98,7 @@ class Cdr implements OcpiObject
             'auth_method' => $this->authMethod,
             'authorization_reference' => $this->authorizationReference,
             'cdr_location' => $this->cdrLocation(),
+            'invoice_reference_id' => $this->invoiceReferenceId,
             'meter_id' => $this->meterId,
             'currency' => $this->currency,
             'tariffs' => $tariffs ?: null,

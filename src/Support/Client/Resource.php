@@ -13,6 +13,12 @@ use Saloon\Http\Response;
 
 class Resource extends BaseResource
 {
+    /**
+     * Most pages requestGetAllPagesSend follows - a guard against a server
+     * that keeps linking to a next page.
+     */
+    private const MAX_PAGES = 1000;
+
     public function requestGetSend(?string $endpoint = null, ?array $query = null): ?array
     {
         $response = $this->connector->send(
@@ -24,6 +30,39 @@ class Resource extends BaseResource
         $response->throw();
 
         return $this->responseGetProcess($response);
+    }
+
+    /**
+     * A paginated GET list, every page: OCPI gives the URL of the next page in
+     * the Link header, until the last one.
+     *
+     * @return array<int, mixed>
+     */
+    public function requestGetAllPagesSend(?string $endpoint = null, ?array $query = null): array
+    {
+        $items = [];
+        $request = (new GetRequest)
+            ->withEndpoint($endpoint)
+            ->withQuery($query);
+
+        for ($page = 1; $page <= self::MAX_PAGES; $page++) {
+            $response = $this->connector->send($request);
+            $response->throw();
+
+            foreach ($response->array()['data'] ?? [] as $item) {
+                $items[] = $item;
+            }
+
+            $nextPageUrl = $this->nextPageUrl($response);
+            if ($nextPageUrl === null) {
+                break;
+            }
+
+            // the next page URL is absolute, its query included
+            $request = (new GetRequest)->withEndpoint($nextPageUrl);
+        }
+
+        return $items;
     }
 
     public function requestPostSend(array|ArrayObject|null $payload, ?string $endpoint = null): array|string|null
@@ -75,6 +114,23 @@ class Resource extends BaseResource
         $response->throw();
 
         return $this->responseDeleteProcess($response);
+    }
+
+    /**
+     * The URL in a Link header like `<https://...?offset=50&limit=50>; rel="next"`.
+     */
+    private function nextPageUrl(Response $response): ?string
+    {
+        $link = $response->header('Link');
+        if (is_array($link)) {
+            $link = implode(',', $link);
+        }
+
+        if (is_string($link) && preg_match('/<([^>]+)>\s*;\s*rel="?next"?/i', $link, $matches) === 1) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
     public function responseGetProcess(Response $response): ?array
