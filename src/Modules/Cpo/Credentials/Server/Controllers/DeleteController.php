@@ -6,15 +6,15 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Ocpi\Models\Party;
+use Ocpi\Modules\Shared\Credentials\Actions\PartyDeleteAction;
 use Ocpi\Support\Enums\OcpiServerErrorCode;
 use Ocpi\Support\Server\Controllers\Controller;
 
 class DeleteController extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, PartyDeleteAction $partyDeleteAction): JsonResponse
     {
         $party = Party::where('code', Context::get('cpo_party_code'))->first();
         if ($party === null) {
@@ -34,14 +34,8 @@ class DeleteController extends Controller
         }
 
         try {
-            DB::connection(config('ocpi.database.connection'))
-                ->transaction(function () use ($party) {
-                    $party->registered = false;
-                    $party->save();
-                    $party->delete();
-
-                    $party->roles()->delete();
-                });
+            // The EMSP itself ends the connection - nobody to tell.
+            $partyDeleteAction->handle($party, tellParty: false);
 
             return $this->ocpiSuccessResponse();
         } catch (Exception $e) {

@@ -78,7 +78,8 @@ class RegisterManual extends Command implements PromptsForMissingInput
                     }
                 }
 
-                $party = Party::updateOrCreate(['code' => $code], [
+                // also an EMSP deleted earlier: it comes back with its history
+                $party = Party::withTrashed()->updateOrCreate(['code' => $code], [
                     'name' => $this->option('name') ?? $code,
                     'version' => $this->option('ocpi-version'),
                     'registered' => true,
@@ -87,6 +88,7 @@ class RegisterManual extends Command implements PromptsForMissingInput
                 ]);
 
                 $party->client_token = $this->option('client-token') ?? $party->client_token ?? $party->generateToken();
+                $party->deleted_at = null;
                 $party->save();
 
                 # through the relation: party_id is not mass assignable on PartyRole

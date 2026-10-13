@@ -29,7 +29,23 @@ class Initialize extends Command
         $input['server_token'] = $this->ask('Credentials Token');
 
         try {
-            $party = Party::create($input);
+            // A CPO deleted earlier comes back as the same Party, keeping its
+            // locations, sessions and CDRs - with nothing left from its old connection.
+            $party = Party::onlyTrashed()->where('code', $input['code'])->first();
+            if ($party !== null) {
+                $party->restore();
+                $party->fill([
+                    'client_token' => null,
+                    'version' => null,
+                    'version_url' => null,
+                    'endpoints' => null,
+                    'registered' => false,
+                    ...$input,
+                ]);
+                $party->save();
+            } else {
+                $party = Party::create($input);
+            }
         } catch (Exception $e) {
             $this->error('Error creating Party.');
             $this->newLine(2);

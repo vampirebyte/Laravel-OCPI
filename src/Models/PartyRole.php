@@ -48,4 +48,29 @@ class PartyRole extends Model
     {
         return $this->belongsTo(Party::class);
     }
+
+    /***
+     * Methods.
+     ***/
+
+    /**
+     * Whether this role is one of our own - our CPO or our EMSP, as set in
+     * ocpi-cpo.party / ocpi-emsp.party: we are connected to ourselves, e.g.
+     * our EMSP side to our CPO side.
+     */
+    public function isOurs(): bool
+    {
+        $ourParty = match ($this->role) {
+            'CPO' => config('ocpi-cpo.party'),
+            'EMSP' => config('ocpi-emsp.party'),
+            default => null,
+        };
+
+        if (empty($ourParty['party_id']) || empty($ourParty['country_code'])) {
+            return false;
+        }
+
+        return strtoupper((string) $this->code) === strtoupper((string) $ourParty['party_id'])
+            && strtoupper((string) $this->country_code) === strtoupper((string) $ourParty['country_code']);
+    }
 }

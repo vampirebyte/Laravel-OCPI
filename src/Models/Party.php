@@ -92,6 +92,22 @@ class Party extends Model
         return $this->code.'_'.Str::uuid();
     }
 
+    /**
+     * Whether the party is ourselves - one of its roles is ours (see
+     * PartyRole::isOurs). Reads the loaded roles: load them with the deleted
+     * ones to tell it for a deleted party too.
+     */
+    public function isOurs(): bool
+    {
+        foreach ($this->roles as $role) {
+            if ($role->isOurs()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static function encodeToken(string $token): string
     {
         return base64_encode($token);

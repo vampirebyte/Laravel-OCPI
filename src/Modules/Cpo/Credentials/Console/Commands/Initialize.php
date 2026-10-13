@@ -49,7 +49,24 @@ class Initialize extends Command
         }
 
         try {
-            $party = Party::create($input);
+            // An EMSP deleted earlier comes back as the same Party, keeping its
+            // sessions and CDRs - with nothing left from its old connection.
+            $party = Party::onlyTrashed()->where('code', $input['code'])->first();
+            if ($party !== null) {
+                $party->restore();
+                $party->fill([
+                    'server_token' => null,
+                    'client_token' => null,
+                    'version' => null,
+                    'version_url' => null,
+                    'endpoints' => null,
+                    'registered' => false,
+                    ...$input,
+                ]);
+                $party->save();
+            } else {
+                $party = Party::create($input);
+            }
         } catch (Exception $e) {
             $this->error('Error creating EMSP Party.');
             $this->newLine(2);

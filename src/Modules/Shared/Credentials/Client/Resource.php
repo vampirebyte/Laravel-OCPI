@@ -15,4 +15,9 @@ class Resource extends OcpiResource
     {
         return $this->requestPutSend($payload);
     }
+
+    public function delete(): ?array
+    {
+        return $this->requestDeleteSend();
+    }
 }
