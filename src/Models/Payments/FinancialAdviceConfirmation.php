@@ -102,6 +102,38 @@ class FinancialAdviceConfirmation extends Model
     }
 
     /**
+     * The card brand: the first EFT line that is not a "label: value" line,
+     * e.g. "Mastercard". EFT data is free text - null when there is none.
+     */
+    public function cardBrand(): ?string
+    {
+        foreach ($this->eft_data ?? [] as $eftLine) {
+            if (! str_contains($eftLine, ':')) {
+                return $eftLine;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The last 4 digits of the masked card number, e.g. "1234" from
+     * "Nr: **** **** **** 1234" - null when no EFT line has them.
+     */
+    public function cardLastDigits(): ?string
+    {
+        foreach ($this->eft_data ?? [] as $eftLine) {
+            $lastCharacters = substr(trim($eftLine), -4);
+
+            if (str_contains($eftLine, '*') && ctype_digit($lastCharacters)) {
+                return $lastCharacters;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * The FinancialAdviceConfirmation object as OCPI shows it.
      *
      * @return array<string, mixed>

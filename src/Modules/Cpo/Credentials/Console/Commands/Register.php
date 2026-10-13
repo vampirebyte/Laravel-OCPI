@@ -5,13 +5,8 @@ namespace Ocpi\Modules\Cpo\Credentials\Console\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
-use Illuminate\Support\Facades\DB;
 use Ocpi\Models\Party;
-use Ocpi\Modules\Cpo\Credentials\Actions\Party\PartyRolesSynchronizeAction;
-use Ocpi\Modules\Cpo\Credentials\Actions\Party\SelfCredentialsGetAction;
-use Ocpi\Modules\Cpo\Credentials\Validators\CredentialsValidator;
-use Ocpi\Modules\Shared\Versions\Actions\PartyInformationAndDetailsSynchronizeAction as VersionsPartyInformationAndDetailsSynchronizeAction;
-use Ocpi\Support\Client\Client;
+use Ocpi\Modules\Cpo\Credentials\Actions\Party\PartyRegisterAction;
 
 class Register extends Command implements PromptsForMissingInput
 {
@@ -34,11 +29,8 @@ class Register extends Command implements PromptsForMissingInput
     /**
      * Execute the console command.
      */
-    public function handle(
-        VersionsPartyInformationAndDetailsSynchronizeAction $versionsPartyInformationAndDetailsSynchronizeAction,
-        PartyRolesSynchronizeAction $partyRolesSynchronizeAction,
-        SelfCredentialsGetAction $selfCredentialsGetAction,
-    ): int {
+    public function handle(PartyRegisterAction $partyRegisterAction): int
+    {
         $partyCode = $this->argument('party_code');
         $this->info('Starting credentials exchange with EMSP '.$partyCode);
 
@@ -66,49 +58,18 @@ class Register extends Command implements PromptsForMissingInput
             return Command::FAILURE;
         }
 
-        $connection = DB::connection(config('ocpi.database.connection'));
-
         try {
-            $connection->beginTransaction();
-
-            $party->server_token = $registrationToken;
-            $party->save();
-
-            $this->info('  - Call EMSP OCPI - GET - Versions Information and Details, store OCPI endpoints');
-            $party = $versionsPartyInformationAndDetailsSynchronizeAction->handle($party, 'ocpi-cpo');
-
-            $party->client_token = $party->generateToken();
-            $this->info('  - Generate, store new OCPI Client Token: '.$party->client_token);
-            $party->save();
-
-            $connection->commit();
-
-            $connection->beginTransaction();
-
-            $this->info('  - Call EMSP OCPI - POST - Credentials endpoint with new Client Token');
-            $ocpiClient = new Client($party, 'credentials');
-            $credentialsPostData = $ocpiClient->credentials()->post($selfCredentialsGetAction->handle($party));
-            $credentialsInput = CredentialsValidator::validate($credentialsPostData ?? [], $party->version);
-
-            $this->info('  - Store received OCPI Server Token: '.$credentialsInput['token'].', mark the EMSP Party as registered');
-            $party->server_token = $credentialsInput['token'];
-            $party->registered = true;
-            $party->save();
-
-            $partyRolesSynchronizeAction->handle($party, $credentialsInput['roles']);
-
-            $connection->commit();
-
-            $this->info('EMSP Party "'.$party->code.'" registered successfully.');
-
-            return Command::SUCCESS;
+            $this->info('  - Call EMSP OCPI - GET Versions Information and Details, POST Credentials with a new Client Token');
+            $party = $partyRegisterAction->handle($party, $registrationToken);
         } catch (Exception $e) {
-            $connection->rollBack();
-
             $this->error($e->getMessage());
 
             return Command::FAILURE;
         }
+
+        $this->info('EMSP Party "'.$party->code.'" registered successfully.');
+
+        return Command::SUCCESS;
     }
 
     /**

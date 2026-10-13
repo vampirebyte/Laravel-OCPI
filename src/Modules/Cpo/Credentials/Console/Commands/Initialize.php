@@ -5,6 +5,7 @@ namespace Ocpi\Modules\Cpo\Credentials\Console\Commands;
 use Exception;
 use Illuminate\Console\Command;
 use Ocpi\Models\Party;
+use Ocpi\Modules\Cpo\Credentials\Actions\Party\PartyInitializeAction;
 
 class Initialize extends Command
 {
@@ -25,7 +26,7 @@ class Initialize extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(PartyInitializeAction $partyInitializeAction)
     {
         $input = [];
 
@@ -51,22 +52,7 @@ class Initialize extends Command
         try {
             // An EMSP deleted earlier comes back as the same Party, keeping its
             // sessions and CDRs - with nothing left from its old connection.
-            $party = Party::onlyTrashed()->where('code', $input['code'])->first();
-            if ($party !== null) {
-                $party->restore();
-                $party->fill([
-                    'server_token' => null,
-                    'client_token' => null,
-                    'version' => null,
-                    'version_url' => null,
-                    'endpoints' => null,
-                    'registered' => false,
-                    ...$input,
-                ]);
-                $party->save();
-            } else {
-                $party = Party::create($input);
-            }
+            $party = $partyInitializeAction->handle($input);
         } catch (Exception $e) {
             $this->error('Error creating EMSP Party.');
             $this->newLine(2);

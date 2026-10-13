@@ -3,6 +3,7 @@
 namespace Ocpi\Support\Client;
 
 use ArrayObject;
+use Illuminate\Support\Str;
 use Ocpi\Support\Client\Requests\DeleteRequest;
 use Ocpi\Support\Client\Requests\GetRequest;
 use Ocpi\Support\Client\Requests\PatchRequest;
@@ -118,6 +119,7 @@ class Resource extends BaseResource
 
     /**
      * The URL in a Link header like `<https://...?offset=50&limit=50>; rel="next"`.
+     * The header may list several links, separated by commas.
      */
     private function nextPageUrl(Response $response): ?string
     {
@@ -126,8 +128,16 @@ class Resource extends BaseResource
             $link = implode(',', $link);
         }
 
-        if (is_string($link) && preg_match('/<([^>]+)>\s*;\s*rel="?next"?/i', $link, $matches) === 1) {
-            return $matches[1];
+        if (! is_string($link)) {
+            return null;
+        }
+
+        foreach (explode(',', $link) as $linkPart) {
+            $isNextPage = str_contains(strtolower($linkPart), 'rel="next"') || str_contains(strtolower($linkPart), 'rel=next');
+
+            if ($isNextPage && str_contains($linkPart, '<') && str_contains($linkPart, '>')) {
+                return Str::between($linkPart, '<', '>');
+            }
         }
 
         return null;
