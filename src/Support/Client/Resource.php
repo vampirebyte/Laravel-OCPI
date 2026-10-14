@@ -9,6 +9,7 @@ use Ocpi\Support\Client\Requests\GetRequest;
 use Ocpi\Support\Client\Requests\PatchRequest;
 use Ocpi\Support\Client\Requests\PostRequest;
 use Ocpi\Support\Client\Requests\PutRequest;
+use RuntimeException;
 use Saloon\Http\BaseResource;
 use Saloon\Http\Response;
 
@@ -59,11 +60,53 @@ class Resource extends BaseResource
                 break;
             }
 
-            // the next page URL is absolute, its query included
+            // The next page URL is absolute, its query included. Saloon only lets
+            // an absolute URL replace the module's URL when allowed: it is followed
+            // on the module's own host only, so a party cannot send our token elsewhere.
+            if (! $this->isOnBaseUrlHost($nextPageUrl)) {
+                throw new RuntimeException("The next page is not on the host of {$this->connector->resolveBaseUrl()}: {$nextPageUrl}");
+            }
+
             $request = (new GetRequest)->withEndpoint($nextPageUrl);
+            $request->allowBaseUrlOverride = true;
         }
 
         return $items;
+    }
+
+    /**
+     * Whether a URL has the scheme, host and port of the module's URL.
+     */
+    private function isOnBaseUrlHost(string $url): bool
+    {
+        $baseUrl = parse_url($this->connector->resolveBaseUrl());
+        $nextUrl = parse_url($url);
+
+        if (! is_array($baseUrl) || ! is_array($nextUrl) || ! isset($baseUrl['host'], $nextUrl['host'])) {
+            return false;
+        }
+
+        return strtolower($nextUrl['scheme'] ?? '') === strtolower($baseUrl['scheme'] ?? '')
+            && strtolower($nextUrl['host']) === strtolower($baseUrl['host'])
+            && $this->portOf($nextUrl) === $this->portOf($baseUrl);
+    }
+
+    /**
+     * The port of a parsed URL, the scheme's default when none is given.
+     *
+     * @param  array<string, int|string>  $url
+     */
+    private function portOf(array $url): ?int
+    {
+        if (isset($url['port'])) {
+            return (int) $url['port'];
+        }
+
+        return match (strtolower($url['scheme'] ?? '')) {
+            'https' => 443,
+            'http' => 80,
+            default => null,
+        };
     }
 
     public function requestPostSend(array|ArrayObject|null $payload, ?string $endpoint = null): array|string|null
