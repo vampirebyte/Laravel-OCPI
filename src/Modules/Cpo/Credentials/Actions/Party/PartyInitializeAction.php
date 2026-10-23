@@ -38,6 +38,7 @@ class PartyInitializeAction
             'version' => null,
             'version_url' => null,
             'endpoints' => null,
+            'endpoint_roles' => null,
             'registered' => false,
             ...$input,
         ]);

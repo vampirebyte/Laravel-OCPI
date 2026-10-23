@@ -31,6 +31,7 @@ class Party extends Model
         'version',
         'version_url',
         'endpoints',
+        'endpoint_roles',
         'client_token',
         'registered',
     ];
@@ -39,6 +40,7 @@ class Party extends Model
     {
         return [
             'endpoints' => AsArrayObject::class,
+            'endpoint_roles' => AsArrayObject::class,
             'registered' => 'boolean',
         ];
     }
@@ -106,6 +108,21 @@ class Party extends Model
         }
 
         return false;
+    }
+
+    /**
+     * Whether we can push the objects of a module to the party: it has an
+     * endpoint for the module, and that endpoint is its RECEIVER interface.
+     * An endpoint without a role counts as one - OCPI 2.1.1 gives none, nor
+     * did a party stored before the roles were.
+     */
+    public function hasReceiverEndpoint(string $module): bool
+    {
+        if (! isset($this->endpoints[$module])) {
+            return false;
+        }
+
+        return ($this->endpoint_roles[$module] ?? 'RECEIVER') === 'RECEIVER';
     }
 
     /**

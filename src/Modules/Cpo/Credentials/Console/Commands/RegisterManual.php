@@ -71,10 +71,13 @@ class RegisterManual extends Command implements PromptsForMissingInput
                     'cdrs' => $this->option('cdrs-url'),
                 ];
 
+                // the eMSP's receiver interfaces: where we push
                 $endpoints = [];
+                $endpointRoles = [];
                 foreach ($givenEndpoints as $module => $url) {
                     if (filled($url)) {
                         $endpoints[$module] = $url;
+                        $endpointRoles[$module] = 'RECEIVER';
                     }
                 }
 
@@ -84,6 +87,7 @@ class RegisterManual extends Command implements PromptsForMissingInput
                     'version' => $this->option('ocpi-version'),
                     'registered' => true,
                     'endpoints' => $endpoints,
+                    'endpoint_roles' => $endpointRoles,
                     'server_token' => $serverToken,
                 ]);
 

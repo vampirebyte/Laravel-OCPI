@@ -84,7 +84,9 @@ class PartyInformationAndDetailsSynchronizeAction
 
         // Set Party OCPI endpoints for version.
         Log::channel('ocpi')->info('Party '.$party->code.' - Set OCPI endpoints for version '.$party->version);
-        $party->endpoints = $this->endpointUrls($versionDetails['endpoints'], $configKey, $party->version);
+        $endpoints = $this->endpointsOf($versionDetails['endpoints'], $configKey, $party->version);
+        $party->endpoints = $endpoints['urls'];
+        $party->endpoint_roles = $endpoints['roles'];
         throw_if(
             ! Arr::has($party->endpoints, 'credentials'),
             new Exception('Party '.$party->code.' - Missing required `credentials` Module endpoint.')
@@ -125,16 +127,20 @@ class PartyInformationAndDetailsSynchronizeAction
     }
 
     /**
-     * Endpoint URL per module. From 2.2 a party may list a module twice, as
-     * SENDER and as RECEIVER: the one we talk to is the counterpart of our own
-     * role for that module (we push to its RECEIVER, pull from its SENDER).
+     * Endpoint URL per module, with the role the party gives it. From 2.2 a
+     * party may list a module twice, as SENDER and as RECEIVER: the one we
+     * talk to is the counterpart of our own role for that module (we push to
+     * its RECEIVER, pull from its SENDER). Listed once, that one is kept,
+     * whatever its role - its role tells whether we can push to it (see
+     * Party::hasReceiverEndpoint). 2.1.1 endpoints have no role.
      *
      * @param  array<int, array{identifier: string, url: string, role?: string}>  $endpoints
-     * @return array<string, string>
+     * @return array{urls: array<string, string>, roles: array<string, string>}
      */
-    private function endpointUrls(array $endpoints, string $configKey, string $version): array
+    private function endpointsOf(array $endpoints, string $configKey, string $version): array
     {
         $urls = [];
+        $roles = [];
         $counterpartRoles = ['SENDER' => 'RECEIVER', 'RECEIVER' => 'SENDER'];
 
         foreach ($endpoints as $endpoint) {
@@ -146,9 +152,13 @@ class PartyInformationAndDetailsSynchronizeAction
             // Keep the first URL, unless this one has the role we want.
             if (! isset($urls[$identifier]) || ($wantedRole !== null && ($endpoint['role'] ?? null) === $wantedRole)) {
                 $urls[$identifier] = $endpoint['url'];
+                unset($roles[$identifier]);
+                if (isset($endpoint['role'])) {
+                    $roles[$identifier] = $endpoint['role'];
+                }
             }
         }
 
-        return $urls;
+        return ['urls' => $urls, 'roles' => $roles];
     }
 }
