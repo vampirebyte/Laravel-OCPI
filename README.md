@@ -211,18 +211,20 @@ use Illuminate\Support\Collection;
 use Ocpi\Models\Cpo\Dto\Connector;
 use Ocpi\Models\Cpo\Dto\Evse;
 use Ocpi\Models\Cpo\Dto\Location;
+use Ocpi\Models\Party;
 
 interface LocationRepository
 {
-    public function getLocations(array $filters = []): Collection;
+    public function getLocations(Party $party, array $filters = []): Collection;
 
-    public function countLocations(array $filters = []): int;
+    public function countLocations(Party $party, array $filters = []): int;
 
-    public function getLocation(string $locationId): ?Location;
+    public function getLocation(Party $party, string $locationId): ?Location;
 
-    public function getEvse(string $locationId, string $evseUid): ?Evse;
+    public function getEvse(Party $party, string $locationId, string $evseUid): ?Evse;
 
     public function getConnector(
+        Party $party,
         string $locationId,
         string $evseUid,
         string $connectorId
@@ -233,6 +235,8 @@ interface LocationRepository
 ## Responsibilities
 
 Your implementation is responsible for exposing your charging infrastructure as OCPI DTOs.
+
+Every method receives the `Party` making the request (identified from its token), so you can return only the locations that party may see - e.g. the ones of the tenant it is connected to. Return `null` from the single-object methods for a location the party may not see: it then gets OCPI 2003 "unknown location".
 
 ### getLocations()
 
@@ -250,7 +254,7 @@ Supported filters:
 Example:
 
 ```php
-public function getLocations(array $filters = []): Collection
+public function getLocations(Party $party, array $filters = []): Collection
 {
     return Location::query()
         ->offset($filters['offset'] ?? 0)
