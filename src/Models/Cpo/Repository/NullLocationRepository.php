@@ -9,6 +9,7 @@ use Ocpi\Models\Cpo\Contracts\LocationRepository;
 use Ocpi\Models\Cpo\Dto\Location;
 use Ocpi\Models\Cpo\Dto\Evse;
 use Ocpi\Models\Cpo\Dto\Connector;
+use Ocpi\Models\Party;
 
 class NullLocationRepository implements LocationRepository
 {
@@ -21,23 +22,23 @@ class NullLocationRepository implements LocationRepository
         );
     }
 
-    public function getLocations(array $filters = []): Collection
+    public function getLocations(Party $party, array $filters = []): Collection
     {
         $this->fail();
     }
-    public function countLocations(array $filters = []): int
+    public function countLocations(Party $party, array $filters = []): int
     {
         $this->fail();
     }
-    public function getLocation(string $locationId): ?Location
+    public function getLocation(Party $party, string $locationId): ?Location
     {
         $this->fail();
     }
-    public function getEvse(string $locationId, string $evseUid): ?Evse
+    public function getEvse(Party $party, string $locationId, string $evseUid): ?Evse
     {
         $this->fail();
     }
-    public function getConnector(string $locationId, string $evseUid, string $connectorId): ?Connector
+    public function getConnector(Party $party, string $locationId, string $evseUid, string $connectorId): ?Connector
     {
         $this->fail();
     }

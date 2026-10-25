@@ -6,13 +6,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
 use Ocpi\Models\Cpo\Contracts\LocationRepository;
+use Ocpi\Models\Party;
 use Ocpi\Support\Enums\OcpiClientErrorCode;
 use Ocpi\Support\Server\Controllers\Controller;
 use Ocpi\Support\Traits\Server\Paginates;
 
 /**
- * The Locations sender interface, the same routes in 2.1.1 and 2.2.1 - the
- * objects are serialized for the version the request came in on.
+ * The Locations sender interface, the same routes in 2.1.1 and 2.2.1 - only
+ * the locations the calling party may see, serialized for the version the
+ * request came in on.
  */
 class LocationsController extends Controller
 {
@@ -28,16 +30,16 @@ class LocationsController extends Controller
         $filters = [...$request->only(['date_from', 'date_to']), 'offset' => $offset, 'limit' => $limit];
 
         $locations = [];
-        foreach ($this->repository->getLocations($filters) as $location) {
+        foreach ($this->repository->getLocations($this->party(), $filters) as $location) {
             $locations[] = $location->toArray($this->version());
         }
 
-        return $this->paginatedResponse($request, $locations, $this->repository->countLocations($filters), $offset, $limit);
+        return $this->paginatedResponse($request, $locations, $this->repository->countLocations($this->party(), $filters), $offset, $limit);
     }
 
     public function show(string $locationId): JsonResponse
     {
-        $location = $this->repository->getLocation($locationId);
+        $location = $this->repository->getLocation($this->party(), $locationId);
 
         return $location
             ? $this->ocpiSuccessResponse($location->toArray($this->version()))
@@ -46,7 +48,7 @@ class LocationsController extends Controller
 
     public function showEvse(string $locationId, string $evseUid): JsonResponse
     {
-        $evse = $this->repository->getEvse($locationId, $evseUid);
+        $evse = $this->repository->getEvse($this->party(), $locationId, $evseUid);
 
         return $evse
             ? $this->ocpiSuccessResponse($evse->toArray($this->version()))
@@ -55,7 +57,7 @@ class LocationsController extends Controller
 
     public function showConnector(string $locationId, string $evseUid, string $connectorId): JsonResponse
     {
-        $connector = $this->repository->getConnector($locationId, $evseUid, $connectorId);
+        $connector = $this->repository->getConnector($this->party(), $locationId, $evseUid, $connectorId);
 
         return $connector
             ? $this->ocpiSuccessResponse($connector->toArray($this->version()))
@@ -72,6 +74,14 @@ class LocationsController extends Controller
             statusMessage: $message,
             httpCode: 404,
         );
+    }
+
+    /**
+     * The party calling, identified from its token by IdentifyParty.
+     */
+    private function party(): Party
+    {
+        return Context::getHidden('cpo_party');
     }
 
     /**

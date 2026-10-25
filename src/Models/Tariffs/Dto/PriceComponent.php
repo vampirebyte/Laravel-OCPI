@@ -22,17 +22,27 @@ class PriceComponent
     }
 
     /**
-     * `vat` exists from OCPI 2.2 - a 2.1.1 price component has none.
+     * `vat` exists from OCPI 2.2. A 2.1.1 price component has none, so its
+     * price is what the driver pays - VAT included, like the 2.1.1 CDR's
+     * total_cost (see Cdr::toArray).
      */
     public function toArray(string $version = '2.2.1'): array
     {
+        if (version_compare($version, '2.2', '<')) {
+            return [
+                'type' => $this->type,
+                'price' => $this->vat !== null ? round($this->price * (1 + $this->vat / 100), 4) : $this->price,
+                'step_size' => $this->stepSize,
+            ];
+        }
+
         $data = [
             'type' => $this->type,
             'price' => $this->price,
             'step_size' => $this->stepSize,
         ];
 
-        if ($this->vat !== null && version_compare($version, '2.2', '>=')) {
+        if ($this->vat !== null) {
             $data['vat'] = $this->vat;
         }
 
